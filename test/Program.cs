@@ -16,7 +16,7 @@ class Program
 
         //api.Authorize(new ApiAuthParams
         //{
-        //    AccessToken = "vk1.a.kp-N_lQmGAVMYcHQb_Rv8UcgwzRIfc4R9N559CJOt5MbH61QwmgoVkBYBaKVqp2oG0dRLPQU1-nUWWfKawvdn39kyrePlcXJKmZQkvRfEooHgb_yumndd-9nDu7Y1gOHjRwd3-kJ5tdYp4sZdLZfczLtciOzL_ETyxHvKdqesMGkoygILmm4xsUrHMMngGMVDUiUz86Y8S3Xv4v66-b3_w"
+        //    AccessToken = ""
         //});
         Console.WriteLine("Введите логин");
         var login = Console.ReadLine();
