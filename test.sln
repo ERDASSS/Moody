@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35303.130
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{916547EB-2A3B-49BB-85DA-D542F4A8A5B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TGBot", "TGBot\TGBot.csproj", "{EB514144-6652-4445-BCF7-5112489ABEE1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{916547EB-2A3B-49BB-85DA-D542F4A8A5B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{916547EB-2A3B-49BB-85DA-D542F4A8A5B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{916547EB-2A3B-49BB-85DA-D542F4A8A5B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB514144-6652-4445-BCF7-5112489ABEE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB514144-6652-4445-BCF7-5112489ABEE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB514144-6652-4445-BCF7-5112489ABEE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB514144-6652-4445-BCF7-5112489ABEE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

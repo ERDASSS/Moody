@@ -31,6 +31,7 @@ C:\Users\com12\source\repos\test\test\bin\Debug\net8.0\Microsoft.Extensions.Opti
 C:\Users\com12\source\repos\test\test\bin\Debug\net8.0\Microsoft.Extensions.Primitives.dll
 C:\Users\com12\source\repos\test\test\bin\Debug\net8.0\NLog.dll
 C:\Users\com12\source\repos\test\test\bin\Debug\net8.0\VkNet.NLog.Extensions.Logging.dll
+<<<<<<< HEAD
 C:\Users\com12\Source\Repos\Moody\test\bin\Debug\net8.0\test.exe
 C:\Users\com12\Source\Repos\Moody\test\bin\Debug\net8.0\test.deps.json
 C:\Users\com12\Source\Repos\Moody\test\bin\Debug\net8.0\test.runtimeconfig.json
@@ -57,3 +58,39 @@ C:\Users\com12\Source\Repos\Moody\test\obj\Debug\net8.0\refint\test.dll
 C:\Users\com12\Source\Repos\Moody\test\obj\Debug\net8.0\test.pdb
 C:\Users\com12\Source\Repos\Moody\test\obj\Debug\net8.0\test.genruntimeconfig.cache
 C:\Users\com12\Source\Repos\Moody\test\obj\Debug\net8.0\ref\test.dll
+=======
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\test.exe
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\test.deps.json
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\test.runtimeconfig.json
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\test.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\test.pdb
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\HtmlAgilityPack.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Microsoft.Extensions.Configuration.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Abstractions.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Binder.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Microsoft.Extensions.Primitives.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\Newtonsoft.Json.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\NLog.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\protobuf-net.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\protobuf-net.Core.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\VkNet.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\VkNet.AudioBypassService.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\bin\Debug\net8.0\VkNet.NLog.Extensions.Logging.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.csproj.AssemblyReference.cache
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.GeneratedMSBuildEditorConfig.editorconfig
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.AssemblyInfoInputs.cache
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.AssemblyInfo.cs
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.csproj.CoreCompileInputs.cache
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.sourcelink.json
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.csproj.Up2Date
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\refint\test.dll
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.pdb
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\test.genruntimeconfig.cache
+D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\test\obj\Debug\net8.0\ref\test.dll
+>>>>>>> 6d8bb82cc840882ec3c73b32e6700ac97f243ec1

@@ -16,5 +16,12 @@
     "C:\\Users\\com12\\.nuget\\packages\\vknet\\1.70.0\\vknet.1.70.0.nupkg.sha512",
     "C:\\Users\\com12\\.nuget\\packages\\vknet.audiobypassservice\\1.7.3\\vknet.audiobypassservice.1.7.3.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file C:\\Users\\com12\\source\\repos\\Moody\\test\\obj\\project.nuget.cache : Invalid property identifier character: <. Path 'version', line 3, position 0."
+    }
+  ]
 }
