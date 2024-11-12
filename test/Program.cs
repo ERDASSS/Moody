@@ -22,26 +22,42 @@ class Program
         var login = Console.ReadLine();
         Console.WriteLine("Введите пароль");
         var password = Console.ReadLine();
-        api.Authorize(new ApiAuthParams
-        {
-            ApplicationId = 52614150,
-            Login = login,
-            Password = password,
-            TwoFactorAuthorization = new Func<string>(() =>
+        Console.WriteLine("Есть ли двух факторка? [Y]|[N]");
+        var response = Console.ReadLine();
+        var flag = false;
+        if (response == "Y")
+            flag = true;
+
+        if (flag)
+            api.Authorize(new ApiAuthParams
             {
-                Console.WriteLine("Введите код 2FA:");
-                var code = Console.ReadLine();
-                return code;
-            }),
-            Settings = Settings.All
-        });
+                ApplicationId = 52614150,
+                Login = login,
+                Password = password,
+                TwoFactorAuthorization = new Func<string>(() =>
+                {
+                    Console.WriteLine("Введите код 2FA:");
+                    var code = Console.ReadLine();
+                    return code;
+                }),
+                Settings = Settings.All
+            });
+        else
+            api.Authorize(new ApiAuthParams
+            {
+                ApplicationId = 52614150,
+                Login = login,
+                Password = password,
+                Settings = Settings.All
+            });
+
         var id = api.UserId;
         Console.WriteLine(api.Token);
         //var song = "318348717_456239095".Split();
         //api.Audio.CreatePlaylist(318348717, "СЮДАА", "", song);
         var musicList = api.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = id });
         var songToPlayList = new StringBuilder();
-        for (int i = 0; i < 5; i ++)
+        for (int i = 0; i < 3; i ++)
         {
             songToPlayList.Append($"{id}_{musicList[i].Id},");
             var x = api.Audio.GetById($"{id}_{musicList[i].Id}".Split());

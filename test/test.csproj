@@ -10,7 +10,6 @@
   <ItemGroup>
     <PackageReference Include="VkNet" Version="1.70.0" />
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.3" />
-    <PackageReference Include="VkNet.NLog.Extensions.Logging" Version="1.3.3" />
   </ItemGroup>
 
 </Project>
