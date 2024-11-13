@@ -516,11 +516,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\com12\\Source\\Repos\\Moody\\test\\test.csproj",
-      "projectName": "test",
-      "projectPath": "C:\\Users\\com12\\Source\\Repos\\Moody\\test\\test.csproj",
+      "projectUniqueName": "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\ApiMethods.csproj",
+      "projectName": "ApiMethods",
+      "projectPath": "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\ApiMethods.csproj",
       "packagesPath": "C:\\Users\\com12\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\com12\\source\\repos\\Moody\\test\\obj\\",
+      "outputPath": "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

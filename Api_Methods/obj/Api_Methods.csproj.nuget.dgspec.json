@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\com12\\source\\repos\\Moody\\test\\test.csproj": {}
+    "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\Api_Methods.csproj": {}
   },
   "projects": {
-    "C:\\Users\\com12\\source\\repos\\Moody\\test\\test.csproj": {
+    "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\Api_Methods.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\com12\\source\\repos\\Moody\\test\\test.csproj",
-        "projectName": "test",
-        "projectPath": "C:\\Users\\com12\\source\\repos\\Moody\\test\\test.csproj",
+        "projectUniqueName": "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\Api_Methods.csproj",
+        "projectName": "Api_Methods",
+        "projectPath": "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\Api_Methods.csproj",
         "packagesPath": "C:\\Users\\com12\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\com12\\source\\repos\\Moody\\test\\obj\\",
+        "outputPath": "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -48,16 +48,6 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "dependencies": {
-            "VkNet": {
-              "target": "Package",
-              "version": "[1.70.0, )"
-            },
-            "VkNet.AudioBypassService": {
-              "target": "Package",
-              "version": "[1.7.3, )"
-            }
-          },
           "imports": [
             "net461",
             "net462",

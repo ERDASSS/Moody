@@ -62,7 +62,7 @@ class Program
             songToPlayList.Append($"{id}_{musicList[i].Id},");
             var x = api.Audio.GetById($"{id}_{musicList[i].Id}".Split());
         }
-        songToPlayList.Remove(songToPlayList.Length - 1, 1);
+        songToPlayList.Length--;
 
         var songsInPlayList = songToPlayList.ToString().Split(',');
         var playlist = api.Audio.CreatePlaylist((long)id, "Тесты2");
