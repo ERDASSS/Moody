@@ -182,6 +182,20 @@
         "runtime": {
           "lib/net6.0/VkNet.AudioBypassService.dll": {}
         }
+      },
+      "ApiMethods/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "VkNet": "1.70.0",
+          "VkNet.AudioBypassService": "1.7.3"
+        },
+        "compile": {
+          "bin/placeholder/ApiMethods.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ApiMethods.dll": {}
+        }
       }
     }
   },
@@ -501,10 +515,16 @@
         "vknet.audiobypassservice.1.7.3.nupkg.sha512",
         "vknet.audiobypassservice.nuspec"
       ]
+    },
+    "ApiMethods/1.0.0": {
+      "type": "project",
+      "path": "../Api_Methods/ApiMethods.csproj",
+      "msbuildProject": "../Api_Methods/ApiMethods.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "ApiMethods >= 1.0.0",
       "VkNet >= 1.70.0",
       "VkNet.AudioBypassService >= 1.7.3"
     ]
@@ -540,7 +560,11 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\ApiMethods.csproj": {
+              "projectPath": "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\ApiMethods.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
