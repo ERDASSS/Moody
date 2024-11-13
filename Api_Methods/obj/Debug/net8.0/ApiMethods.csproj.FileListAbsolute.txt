@@ -1,0 +1,13 @@
+C:\Users\com12\source\repos\Moody\Api_Methods\bin\Debug\net8.0\ApiMethods.deps.json
+C:\Users\com12\source\repos\Moody\Api_Methods\bin\Debug\net8.0\ApiMethods.dll
+C:\Users\com12\source\repos\Moody\Api_Methods\bin\Debug\net8.0\ApiMethods.pdb
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\ApiMethods.csproj.AssemblyReference.cache
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\ApiMethods.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\ApiMethods.AssemblyInfoInputs.cache
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\ApiMethods.AssemblyInfo.cs
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\ApiMethods.csproj.CoreCompileInputs.cache
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\ApiMethods.sourcelink.json
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\ApiMethods.dll
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\refint\ApiMethods.dll
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\ApiMethods.pdb
+C:\Users\com12\source\repos\Moody\Api_Methods\obj\Debug\net8.0\ref\ApiMethods.dll

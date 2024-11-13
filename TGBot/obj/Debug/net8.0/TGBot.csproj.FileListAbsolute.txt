@@ -17,3 +17,22 @@ D:\max_k\Documents\Документы\Учеба\Проектный практи
 D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\TGBot\obj\Debug\net8.0\TGBot.pdb
 D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\TGBot\obj\Debug\net8.0\TGBot.genruntimeconfig.cache
 D:\max_k\Documents\Документы\Учеба\Проектный практикум\Moody\TGBot\obj\Debug\net8.0\ref\TGBot.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\TGBot.exe
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\TGBot.deps.json
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\TGBot.runtimeconfig.json
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\TGBot.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\TGBot.pdb
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\System.Text.Json.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\Telegram.Bot.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.csproj.AssemblyReference.cache
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.AssemblyInfoInputs.cache
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.AssemblyInfo.cs
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.csproj.CoreCompileInputs.cache
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.sourcelink.json
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.csproj.Up2Date
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\refint\TGBot.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.pdb
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.genruntimeconfig.cache
+C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\ref\TGBot.dll
