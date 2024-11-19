@@ -79,15 +79,19 @@ public class TGBot
             {
                 if (query.Data is null || query.Message is null) break;
                 var chatId = query.Message.Chat.Id;
+                if (!users.ContainsKey(chatId))
+                {
+                    break;
+                }
                 //Console.WriteLine(chatId);
-                if (query.Data.EndsWith("Mood"))
+                if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
                 {
                     var mood = query.Data.Replace("Mood", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
                     users[chatId].AddMood(mood.MoodParse());
                 }
                 
-                else if (query.Data.EndsWith("Genre"))
+                else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genre"))
                 {
                     var genre = query.Data.Replace("Genre", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
@@ -96,12 +100,12 @@ public class TGBot
                 
                 else if (query.Data.StartsWith("accept"))
                 {
-                    if (query.Data.EndsWith("Moods"))
+                    if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Moods"))
                     {
                         await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
                         users[chatId].AreMoodsSelected = true;
                     }
-                    else if (query.Data.EndsWith("Genres"))
+                    else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genres"))
                     {
                         await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
                         users[chatId].AreGenresSelected = true;
@@ -366,7 +370,9 @@ public class TGBot
         }
 
         await bot.SendMessage(chatId, "Пока только ваши треки");
-        await bot.SendMessage(chatId, string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title)));
-        Console.WriteLine(users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
+        var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
+        await bot.SendMessage(chatId, tracks);
+        Console.WriteLine(tracks);
+        user.ResetMoodsAndGenres();
     }
 }
