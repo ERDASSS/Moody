@@ -1,6 +1,8 @@
 ﻿using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
+namespace TGBot;
+
 public enum Mood
 {
     Fun,
@@ -17,7 +19,7 @@ public static class MoodExtensions
     
     public static Mood MoodParse(this string moodString)
     {
-        if (Moods.TryGetValue(moodString.ToLower(), out var mood))
+        if (Moods.TryGetValue(moodString, out var mood))
             return mood;
         throw new ArgumentException();
     }

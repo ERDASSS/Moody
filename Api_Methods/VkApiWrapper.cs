@@ -39,6 +39,18 @@ namespace ApiMethods
                 Settings = Settings.Audio
             });
         }
+        
+        public void AuthorizeWith2FA (string login, string password, string code)
+        {
+            vkApi.Authorize(new ApiAuthParams
+            {
+                ApplicationId = applicationId,
+                Login = login,
+                Password = password,
+                TwoFactorAuthorization = new Func<string>(() => code),
+                Settings = Settings.Audio
+            });
+        }
 
         public void AuthorizeWithout2FA(string login, string password)
         {

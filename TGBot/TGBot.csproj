@@ -11,4 +11,8 @@
       <PackageReference Include="Telegram.Bot" Version="22.0.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Api_Methods\ApiMethods.csproj" />
+    </ItemGroup>
+
 </Project>
