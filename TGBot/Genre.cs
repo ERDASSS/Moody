@@ -1,6 +1,8 @@
 ﻿using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
+namespace TGBot;
+
 public enum Genre
 {
     Pop,
@@ -33,7 +35,7 @@ public static class GenreExtensions
     
     public static Genre GenreParse(this string genreString)
     {
-        if (Genres.TryGetValue(genreString.ToLower(), out var genre))
+        if (Genres.TryGetValue(genreString, out var genre))
             return genre;
         throw new ArgumentException();
     }

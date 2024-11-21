@@ -3,42 +3,17 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using VkNet.AudioBypassService.Exceptions;
+using ApiMethods;
+
+namespace TGBot;
 
 public class TGBot
 {
     public TGBot(string token)
     {
-        this.token = token;
-    }
-
-    private readonly string token;
-    private TelegramBotClient bot;
-    private User me;
-    private readonly CancellationTokenSource cts = new();
-    private readonly Dictionary<long, Authorization> authorizations = new();
-    private readonly Dictionary<long, (bool, HashSet<Mood>?, HashSet<Genre>?)> users = new();
-    private readonly Dictionary<long, (string?, string?)> polls = new();
-
-    private readonly ReplyKeyboardMarkup replyKeyboardWithFunc = new(
-        new List<KeyboardButton[]>
-        {
-            new[]
-            {
-                new KeyboardButton("/hello"),
-                new KeyboardButton("/playlist")
-            }
-        })
-    {
-        ResizeKeyboard = false
-    };
-
-    private readonly List<InputPollOption> pollMoods = MoodExtensions.CreateInputPollOptions().ToList();
-    private readonly List<InputPollOption> pollGenres = GenreExtensions.CreateInputPollOptions().ToList();
-
-    public async Task Start()
-    {
         bot = new TelegramBotClient(token, cancellationToken: cts.Token);
-        me = await bot.GetMe();
+        me = bot.GetMe().Result;
         // await bot.DeleteWebhook();
         // await bot.DropPendingUpdates();
         bot.OnError += OnError;
@@ -47,31 +22,38 @@ public class TGBot
         Console.WriteLine($"{me.FirstName} запущен!");
     }
 
-    public async Task ConfirmAuthorization(long chatId, bool wasAuthorizationSuccessful)
+
+    private readonly TelegramBotClient bot;
+    private readonly User me;
+    private readonly CancellationTokenSource cts = new();
+    private readonly Dictionary<long, Authorization> authorizations = new();
+    //private readonly Dictionary<long, (bool, HashSet<Mood>?, HashSet<Genre>?)> users = new();
+    private readonly Dictionary<long, VkUser> users = new();
+    //private readonly Dictionary<long, (string?, string?)> polls = new();
+
+    private readonly ReplyKeyboardMarkup replyKeyboardWithFunc = new(
+        new List<KeyboardButton[]>
+        {
+            new[]
+            {
+                new KeyboardButton("/start"),
+                new KeyboardButton("/hello"),
+                new KeyboardButton("/playlist")
+            }
+        })
     {
-        if (!authorizations.TryGetValue(chatId, out _))
-        {
-            Console.WriteLine("Нет такого chatId");
-            return;
-        }
+        ResizeKeyboard = false
+    };
 
-        if (wasAuthorizationSuccessful)
-        {
-            authorizations.Remove(chatId);
-            if (users.TryGetValue(chatId, out var value))
-                users[chatId] = (true, value.Item2, value.Item3);
-            else
-                users[chatId] = (true, null, null);
-            await bot.SendMessage(chatId, "Авторизация успешна");
-            await GetPlayList(chatId);
-        }
+    // private readonly List<InputPollOption> pollMoods = MoodExtensions.CreateInputPollOptions().ToList();
+    // private readonly List<InputPollOption> pollGenres = GenreExtensions.CreateInputPollOptions().ToList();
+    private readonly InlineKeyboardMarkup inlineMoods = MoodExtensions.CreateInlineKeyboardMarkup();
+    private readonly InlineKeyboardMarkup inlineGenres = GenreExtensions.CreateInlineKeyboardMarkup();
 
-        else
-        {
-            await bot.SendMessage(chatId, "Авторизация неуспешна");
-            await StartAuthorization(chatId);
-        }
-    }
+    // private async Task Authorize(long chatId)
+    // {
+    //     await StartAuthorization(chatId);
+    // }
 
     private async Task OnError(Exception exception, HandleErrorSource source)
     {
@@ -83,19 +65,62 @@ public class TGBot
     {
         switch (update)
         {
-            case { PollAnswer: { } pollAnswer }:
-                if (pollAnswer.User is null)
+            // case { PollAnswer: { } pollAnswer }:
+            //     if (pollAnswer.User is null)
+            //         break;
+            //     
+            //     if (!polls.ContainsKey(pollAnswer.User.Id))
+            //         break;
+            //     if (pollAnswer.PollId == polls[pollAnswer.User.Id].Item1)
+            //         await OnPollAnswer<Mood>(pollAnswer);
+            //     else if (pollAnswer.PollId == polls[pollAnswer.User.Id].Item2)
+            //         await OnPollAnswer<Genre>(pollAnswer);
+            //     break;
+            case { CallbackQuery: { } query }:
+            {
+                if (query.Data is null || query.Message is null) break;
+                var chatId = query.Message.Chat.Id;
+                if (!users.ContainsKey(chatId))
+                {
                     break;
+                }
+                //Console.WriteLine(chatId);
+                if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
+                {
+                    var mood = query.Data.Replace("Mood", "");
+                    await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
+                    users[chatId].AddMood(mood.MoodParse());
+                }
+                
+                else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genre"))
+                {
+                    var genre = query.Data.Replace("Genre", "");
+                    await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
+                    users[chatId].AddGenre(genre.GenreParse());
+                }
+                
+                else if (query.Data.StartsWith("accept"))
+                {
+                    if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Moods"))
+                    {
+                        await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
+                        users[chatId].AreMoodsSelected = true;
+                    }
+                    else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genres"))
+                    {
+                        await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
+                        users[chatId].AreGenresSelected = true;
+                    }
+                    else break;
 
-                if (!polls.ContainsKey(pollAnswer.User.Id))
-                    break;
-                if (pollAnswer.PollId == polls[pollAnswer.User.Id].Item1)
-                    await OnPollAnswer<Mood>(pollAnswer);
-                else if (pollAnswer.PollId == polls[pollAnswer.User.Id].Item2)
-                    await OnPollAnswer<Genre>(pollAnswer);
+                    await GetPlayList(chatId);
+                }
+
                 break;
+            }
+
             default:
-                Console.WriteLine($"Received unhandled update {update.Type}");
+                Console.WriteLine($"Не обрабатывается тип {update.Type}");
                 break;
         }
     }
@@ -131,30 +156,9 @@ public class TGBot
                 await StartAuthorization(msg.Chat.Id);
                 break;
             }
-            case "/moods":
-            {
-                if (!users.TryGetValue(msg.Chat.Id, out var user) || !user.Item1)
-                {
-                    await StartAuthorization(msg.Chat.Id);
-                    break;
-                }
-
-                await ChooseMoods(msg.Chat.Id);
-                break;
-            }
-            case "/genres":
-            {
-                if (!users.TryGetValue(msg.Chat.Id, out var user) || !user.Item1)
-                {
-                    await StartAuthorization(msg.Chat.Id);
-                    break;
-                }
-
-                await ChooseGenres(msg.Chat.Id);
-                break;
-            }
             case "/playlist":
             {
+                Console.WriteLine(msg.Chat.Id);
                 await GetPlayList(msg.Chat.Id);
                 break;
             }
@@ -186,85 +190,190 @@ public class TGBot
         if (authorization.Password is null)
         {
             authorization.AddPassword(message.Text);
-            await bot.SendMessage(message.Chat.Id, "Введите код 2FA:");
+            var wasAuthorizationSuccessful = await TryAuthorizeWithout2FA(message.Chat.Id);
+            if (!wasAuthorizationSuccessful)
+                await bot.SendMessage(message.Chat.Id, "Введите код 2FA:");
             return;
         }
 
         authorization.AddCode(message.Text);
-        // нужна функция, чтобы передать chatId и authorization в основную программу и оттуда вызвать следующий метод
-        await ConfirmAuthorization(message.Chat.Id, true);
+        await TryAuthorizeWith2FA(message.Chat.Id);
     }
 
-    private async Task ChooseMoods(long chatId)
+    private async Task ConfirmAuthorization(long chatId, bool wasAuthorizationSuccessful)
     {
-        var msg = await bot.SendPoll(chatId, "Выберите настроение", pollMoods, isAnonymous: false,
-            allowsMultipleAnswers: true);
-        if (msg.Poll is null)
+        if (!authorizations.TryGetValue(chatId, out _))
         {
-            Console.WriteLine("нет опроса");
+            Console.WriteLine("Нет такого chatId");
             return;
         }
 
-        polls[chatId] = polls.TryGetValue(chatId, out var poll)
-            ? (msg.Poll.Id, poll.Item2)
-            : (msg.Poll.Id, null);
+        if (wasAuthorizationSuccessful)
+        {
+            authorizations.Remove(chatId);
+            await bot.SendMessage(chatId, "Авторизация успешна");
+            await GetPlayList(chatId);
+        }
+
+        else
+        {
+            await bot.SendMessage(chatId, "Неправильный логин или пароль");
+            await StartAuthorization(chatId);
+        }
     }
 
-    private async Task ChooseGenres(long chatId)
+    private async Task<bool> TryAuthorizeWithout2FA(long chatId)
     {
-        var msg = await bot.SendPoll(chatId, "Выберите жанр", pollGenres, isAnonymous: false,
-            allowsMultipleAnswers: true);
-        if (msg.Poll is null)
+        if (!authorizations.TryGetValue(chatId, out var authorization)
+            || authorization.Login is null
+            || authorization.Password is null)
+            return false;
+
+        var vkApi = new VkApiWrapper();
+        try
         {
-            Console.WriteLine("нет опроса");
-            return;
+            vkApi.AuthorizeWithout2FA(authorization.Login, authorization.Password);
+        }
+        catch (VkAuthException exception)
+        {
+            Console.WriteLine(exception);
+            if (exception.Message == "Неправильный логин или пароль")
+                await ConfirmAuthorization(chatId, false);
+            else if (exception.Message == "Произведено слишком много попыток входа")
+                await bot.SendMessage(chatId, "Произведено слишком много попыток входа");
+            return false;
+        }
+        catch (InvalidOperationException exception)
+        {
+            Console.WriteLine(exception);
+            return false;
         }
 
-        polls[chatId] = polls.TryGetValue(chatId, out var poll)
-            ? (poll.Item1, msg.Poll.Id)
-            : (null, msg.Poll.Id);
+        users[chatId] = new(vkApi);
+        await ConfirmAuthorization(chatId, true);
+        return true;
     }
 
-    private async Task OnPollAnswer<T>(PollAnswer pollAnswer) where T : Enum
+    private async Task<bool> TryAuthorizeWith2FA(long chatId)
     {
-        if (pollAnswer.User == null) return;
-        var currentSelections = pollAnswer.OptionIds.Distinct().Select(x => (T)(object)x).ToHashSet();
-        Console.WriteLine($"{pollAnswer.User.FirstName} выбрал [{string.Join(',', currentSelections)}]");
+        if (!authorizations.TryGetValue(chatId, out var authorization)
+            || authorization.Login is null
+            || authorization.Password is null
+            || authorization.Code is null)
+            return false;
 
-        var user = users[pollAnswer.User.Id];
-        if (typeof(T) == typeof(Mood))
+        var vkApi = new VkApiWrapper();
+        try
         {
-            users[pollAnswer.User.Id] = (user.Item1, currentSelections as HashSet<Mood>, user.Item3);
+            vkApi.AuthorizeWith2FA(authorization.Login, authorization.Password, authorization.Code);
         }
-        else if (typeof(T) == typeof(Genre))
+        catch (VkAuthException exception)
         {
-            users[pollAnswer.User.Id] = (user.Item1, user.Item2, currentSelections as HashSet<Genre>);
+            Console.WriteLine(exception);
+            if (exception.Message == "Неправильный логин или пароль")
+                await ConfirmAuthorization(chatId, false);
+            else if (exception.Message == "Произведено слишком много попыток входа")
+                await bot.SendMessage(chatId, "Произведено слишком много попыток входа");
+            return false;
+        }
+        catch (InvalidOperationException exception)
+        {
+            Console.WriteLine(exception);
+            return false;
         }
 
-        await GetPlayList(pollAnswer.User.Id);
+        users[chatId] = new(vkApi);
+        await ConfirmAuthorization(chatId, true);
+        return true;
     }
+
+
+    // private async Task ChooseMoodsPoll(long chatId)
+    // {
+    //     var msg = await bot.SendPoll(chatId, "Выберите настроение", pollMoods, isAnonymous: false,
+    //         allowsMultipleAnswers: true);
+    //     if (msg.Poll is null)
+    //     {
+    //         Console.WriteLine("нет опроса");
+    //         return;
+    //     }
+    //
+    //     polls[chatId] = polls.TryGetValue(chatId, out var poll)
+    //         ? (msg.Poll.Id, poll.Item2)
+    //         : (msg.Poll.Id, null);
+    // }
+    //
+    // private async Task ChooseGenresPoll(long chatId)
+    // {
+    //     var msg = await bot.SendPoll(chatId, "Выберите жанр", pollGenres, isAnonymous: false,
+    //         allowsMultipleAnswers: true);
+    //     if (msg.Poll is null)
+    //     {
+    //         Console.WriteLine("нет опроса");
+    //         return;
+    //     }
+    //
+    //     polls[chatId] = polls.TryGetValue(chatId, out var poll)
+    //         ? (poll.Item1, msg.Poll.Id)
+    //         : (null, msg.Poll.Id);
+    // }
+    //
+    // private async Task OnPollAnswer<T>(PollAnswer pollAnswer) where T : Enum
+    // {
+    //     if (pollAnswer.User == null) return;
+    //     var currentSelections = pollAnswer.OptionIds.Distinct().Select(x => (T)(object)x).ToHashSet();
+    //     Console.WriteLine($"{pollAnswer.User.FirstName} выбрал [{string.Join(',', currentSelections)}]");
+    //
+    //     var user = users[pollAnswer.User.Id];
+    //     if (typeof(T) == typeof(Mood))
+    //     {
+    //         users[pollAnswer.User.Id] = (user.Item1, currentSelections as HashSet<Mood>, user.Item3);
+    //     }
+    //     else if (typeof(T) == typeof(Genre))
+    //     {
+    //         users[pollAnswer.User.Id] = (user.Item1, user.Item2, currentSelections as HashSet<Genre>);
+    //     }
+    //
+    //     await GetPlayList(pollAnswer.User.Id);
+    // }
 
     private async Task GetPlayList(long chatId)
     {
-        if (!users.TryGetValue(chatId, out var user) || !user.Item1)
+        if (!users.TryGetValue(chatId, out var user))
         {
+            //users[chatId] = new VkUser(new VkApiWrapper());
             await StartAuthorization(chatId);
             return;
         }
 
-        if (user.Item2 is null)
+        // if (user.Item2 is null)
+        // {
+        //     await ChooseMoods(chatId);
+        //     return;
+        // }
+        //
+        // if (user.Item3 is null)
+        // {
+        //     await ChooseGenres(chatId);
+        //     return;
+        // }
+        
+        if (!user.AreMoodsSelected)
         {
-            await ChooseMoods(chatId);
+            await bot.SendMessage(chatId, "Выберите настроение", replyMarkup: inlineMoods);
             return;
         }
 
-        if (user.Item3 is null)
+        if (!user.AreGenresSelected)
         {
-            await ChooseGenres(chatId);
+            await bot.SendMessage(chatId, "Выберите жанры", replyMarkup: inlineGenres);
             return;
         }
 
-        // тут нужна функция чтобы по chatId: int, moods: set и genre: set получить плейлист
-        Console.WriteLine(user.ToString());
+        await bot.SendMessage(chatId, "Пока только ваши треки");
+        var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
+        await bot.SendMessage(chatId, tracks);
+        Console.WriteLine(tracks);
+        user.ResetMoodsAndGenres();
     }
 }
