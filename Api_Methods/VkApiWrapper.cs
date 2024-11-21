@@ -56,7 +56,22 @@ namespace ApiMethods
         public VkCollection<Audio> GetFavoriteTracks()
             => vkApi.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = GetUserId() });
 
-        public string[] CreateSongListVkFormat(VkCollection<Audio> songCollection)
+        
+        public AudioPlaylist CreatePlaylist(string playListName, VkCollection<Audio> songList = null)
+        {
+            var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName);
+            var songListInVkFormat = CreateSongListVkFormat(songList);
+
+            if (songListInVkFormat != null)
+            {
+                foreach (var song in songListInVkFormat)
+                    vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, song.Split());
+            }
+
+            return playlist;
+        }
+
+        private string[] CreateSongListVkFormat(VkCollection<Audio> songCollection)
         {
             var songToVkFormat = new StringBuilder();
 
@@ -66,19 +81,6 @@ namespace ApiMethods
             songToVkFormat.Length--;
 
             return songToVkFormat.ToString().Split(',');
-        }
-
-        public AudioPlaylist CreatePlaylist(string playListName, string[] songListInVkFormat = null)
-        {
-            var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName);
-
-            if (songListInVkFormat != null)
-            {
-                foreach (var song in songListInVkFormat)
-                    vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, song.Split());
-            }
-
-            return playlist;
         }
 
     }

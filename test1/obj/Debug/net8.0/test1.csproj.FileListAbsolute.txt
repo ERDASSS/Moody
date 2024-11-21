@@ -24,3 +24,5 @@ C:\Users\com12\source\repos\Moody\test1\obj\Debug\net8.0\refint\test1.dll
 C:\Users\com12\source\repos\Moody\test1\obj\Debug\net8.0\test1.pdb
 C:\Users\com12\source\repos\Moody\test1\obj\Debug\net8.0\test1.genruntimeconfig.cache
 C:\Users\com12\source\repos\Moody\test1\obj\Debug\net8.0\ref\test1.dll
+C:\Users\com12\Source\Repos\Moody\test1\bin\Debug\net8.0\ApiMethods.dll
+C:\Users\com12\Source\Repos\Moody\test1\bin\Debug\net8.0\ApiMethods.pdb

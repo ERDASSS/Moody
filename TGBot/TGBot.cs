@@ -24,6 +24,7 @@ public class TGBot
         {
             new[]
             {
+                new KeyboardButton("/hello"),
                 new KeyboardButton("/playlist")
             }
         })

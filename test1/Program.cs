@@ -6,6 +6,7 @@ using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
 using VkNet.Model;
 
+
 class Program
 {
     static void Main(string[] args)
@@ -60,7 +61,6 @@ class Program
         for (int i = 0; i < 3; i++)
         {
             songToPlayList.Append($"{id}_{musicList[i].Id},");
-            var x = api.Audio.GetById($"{id}_{musicList[i].Id}".Split());
         }
         songToPlayList.Length--;
 

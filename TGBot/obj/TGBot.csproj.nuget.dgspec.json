@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\com12\\Source\\Repos\\Moody\\TGBot\\TGBot.csproj": {}
+    "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\TGBot.csproj": {}
   },
   "projects": {
-    "C:\\Users\\com12\\Source\\Repos\\Moody\\TGBot\\TGBot.csproj": {
+    "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\TGBot.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\com12\\Source\\Repos\\Moody\\TGBot\\TGBot.csproj",
+        "projectUniqueName": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\TGBot.csproj",
         "projectName": "TGBot",
-        "projectPath": "C:\\Users\\com12\\Source\\Repos\\Moody\\TGBot\\TGBot.csproj",
+        "projectPath": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\TGBot.csproj",
         "packagesPath": "C:\\Users\\com12\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\com12\\Source\\Repos\\Moody\\TGBot\\obj\\",
+        "outputPath": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

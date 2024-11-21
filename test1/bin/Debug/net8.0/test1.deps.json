@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v8.0": {
       "test1/1.0.0": {
         "dependencies": {
+          "ApiMethods": "1.0.0",
           "VkNet": "1.70.0",
           "VkNet.AudioBypassService": "1.7.3"
         },
@@ -110,6 +111,18 @@
             "fileVersion": "1.7.3.0"
           }
         }
+      },
+      "ApiMethods/1.0.0": {
+        "dependencies": {
+          "VkNet": "1.70.0",
+          "VkNet.AudioBypassService": "1.7.3"
+        },
+        "runtime": {
+          "ApiMethods.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
       }
     }
   },
@@ -195,6 +208,11 @@
       "sha512": "sha512-8zax03Mfeoo0R6D7aoPmYosuFV3X3pVqdPHFuv1AaXEJM0QevSHHS3YYiKw3RhJR1GC/wDvW6IV5nBhVx8J4tQ==",
       "path": "vknet.audiobypassservice/1.7.3",
       "hashPath": "vknet.audiobypassservice.1.7.3.nupkg.sha512"
+    },
+    "ApiMethods/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }
