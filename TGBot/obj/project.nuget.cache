@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "CAtEaq08AsY=",
+  "dgSpecHash": "yJMD4nGfMtQ=",
   "success": true,
-  "projectFilePath": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\TGBot.csproj",
+  "projectFilePath": "C:\\Users\\com12\\Source\\Repos\\Moody\\TGBot\\TGBot.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\com12\\.nuget\\packages\\htmlagilitypack\\1.11.43\\htmlagilitypack.1.11.43.nupkg.sha512",
     "C:\\Users\\com12\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",

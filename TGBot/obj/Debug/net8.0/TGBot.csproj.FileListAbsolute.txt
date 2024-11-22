@@ -36,3 +36,11 @@ C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\refint\TGBot.dll
 C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.pdb
 C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\TGBot.genruntimeconfig.cache
 C:\Users\com12\Source\Repos\Moody\TGBot\obj\Debug\net8.0\ref\TGBot.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\HtmlAgilityPack.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\protobuf-net.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\protobuf-net.Core.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\VkNet.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\VkNet.AudioBypassService.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\ApiMethods.dll
+C:\Users\com12\Source\Repos\Moody\TGBot\bin\Debug\net8.0\ApiMethods.pdb
