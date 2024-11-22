@@ -233,7 +233,6 @@ public class TGBot
         {
             authorizations.Remove(chatId);
             await bot.SendMessage(chatId, "Авторизация прошла успешно", replyMarkup: replyKeyboardPlaylist);
-            await GetPlayList(chatId);
         }
         else
         {
