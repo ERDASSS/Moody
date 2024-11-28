@@ -5,6 +5,7 @@ namespace TGBot;
 
 public enum Mood
 {
+    None,
     Fun,
     Sad
 }

@@ -8,6 +8,8 @@ using ApiMethods;
 using System.Net;
 using System;
 using System.Text.RegularExpressions;
+using VkNet.Model.Attachments;
+using VkNet.Utils;
 
 namespace TGBot;
 
@@ -351,6 +353,28 @@ public class TGBot
         var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
         await bot.SendMessage(chatId, tracks);
         Console.WriteLine(tracks);
+        var tracksList
         user.ResetMoodsAndGenres();
+    }
+
+    private async void CreatePlaylist(VkCollection<VkNet.Model.Attachments.Audio> tracksList, long chatId)
+    {
+        var playlist = users[chatId].VkApi.CreateEmptyPlaylist("Избранные треки по настроению...");
+
+        foreach (var track in tracksList)
+        {
+            if (!DataBase.HasTrackInDataBase(track))
+            {
+                await bot.SendMessage(chatId, $"{track.Title} - {track.Artist} данный трек не найден в базе данных." +
+                    $" Для продолжения работы необходимо указать настроение и жанр данного трека");
+                await bot.SendMessage(chatId, "Выберите настроение", replyMarkup: inlineMoods);
+                await bot.SendMessage(chatId, "Выберите жанр", replyMarkup: inlineGenres);
+                //DataBase.AddTrackToDataBase(track, genre, mood);
+            }
+           
+            if (DataBase.IsRightTrack(track))
+                users[chatId].VkApi.AddTrackToPlaylist(track, playlist);
+        }
+
     }
 }

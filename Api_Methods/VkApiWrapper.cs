@@ -83,6 +83,18 @@ namespace ApiMethods
             return playlist;
         }
 
+        public AudioPlaylist CreateEmptyPlaylist(string playListName)
+        {
+            var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName);
+            return playlist;
+        }
+
+        public void AddTrackToPlaylist(Audio track, AudioPlaylist playlist)
+        {
+            var trackInVkFormat = $"{GetUserId()}_{track.Id}".Split();
+            vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, trackInVkFormat);
+        }
+
         private string[] CreateSongListVkFormat(VkCollection<Audio> songCollection)
         {
             var songToVkFormat = new StringBuilder();

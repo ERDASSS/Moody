@@ -5,6 +5,7 @@ namespace TGBot;
 
 public enum Genre
 {
+    None,
     Pop,
     Rock,
     HipHop,
