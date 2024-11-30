@@ -3,61 +3,63 @@
 public class DbAudio
 {
     public int DbAudioId { get; }
-    public DbAudioTitleVariants TitleVariants { get; set; }
-    public DbAudioAuthorVariants AuthorVariants { get; set; }
+    public string Title { get; }
+    public DbAuthor Author { get; }
+    public AudioParameters Parameters { get; }
 
-
-    public DbAudio(int dbAudioId, DbAudioTitleVariants titleVariants, DbAudioAuthorVariants authorVariants)
+    public DbAudio(int dbAudioId, string title, DbAuthor author, AudioParameters parameters)
     {
         DbAudioId = dbAudioId;
-        TitleVariants = titleVariants;
-        AuthorVariants = authorVariants;
+        Title = title;
+        Author = author;
+        Parameters = parameters;
     }
 }
 
-public class DbAudioTitleVariants(HashSet<string> variants)
+public class DbAuthor(int id, string name)
 {
-    public HashSet<string> Variants = variants;
-}
-
-public class DbAudioAuthorVariants(HashSet<string> variants)
-{
-    public HashSet<string> Variants = variants;
+    public int Id { get; } = id;
+    public string Name { get; } = name;
 }
 
 public class AudioParameters
 {
-    public Dictionary<DbAudioParameter, AudioParameterValues> Parameters;
+    public Dictionary<DbAudioParameter, AudioParameterValues> Parameters { get; } = new();
 }
 
 public class DbAudioParameter // например настроение или жанр
+    (int id, string name)
 {
-    public int Id;
-    public string Name;
+    public int Id { get; } = id;
+    public string Name { get; } = name;
 }
 
-public class DbAudioMood : DbAudioParameter
+public class DbAudioParameterValue(int id, string name) // например веселая или спокойная для настроения
 {
-}
-
-public class DbAudioGenre : DbAudioParameter
-{
-}
-
-public class DbAudioParameterValue // например веселая или спокойная для настроения
-{
-    public int Id;
-    public string Name;
+    public int Id { get; } = id;
+    public string Name { get; } = name;
 }
 
 public class AudioParameterValues
 {
-    public Dictionary<AudioParameterValues, UsersVotes> Values;
+    public Dictionary<DbAudioParameterValue, UsersVotes> Values { get; } = new();
 }
 
-public class UsersVotes
+public class UsersVotes()
 {
-    public Dictionary<VoteValue, List<User>> Votes;
+    public Dictionary<VoteValue, List<User>> Votes { get; } = new();
+}
+
+// public class Vote(int id, User user, VoteValue voteValue)
+// {
+//     public int Id { get; } = id;
+//     public User User { get; } = user;
+//     public VoteValue VoteValue { get; } = voteValue;
+// }
+
+public class User(int id)
+{
+    public int Id = id;
 }
 
 public enum VoteValue
