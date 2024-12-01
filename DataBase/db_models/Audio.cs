@@ -34,6 +34,24 @@ public class DbAudioParameter // например настроение или ж
     public string Name { get; } = name;
 }
 
+public class Mood : DbAudioParameter
+{
+    public static Mood Instance { get; } = new Mood();
+
+    public Mood() : base(1, "mood")
+    {
+    }
+}
+
+public class Genre : DbAudioParameter
+{
+    public static Genre Instance { get; } = new Genre();
+
+    public Genre() : base(2, "genre")
+    {
+    }
+}
+
 public class DbAudioParameterValue(int id, string name) // например веселая или спокойная для настроения
 {
     public int Id { get; } = id;
@@ -64,8 +82,23 @@ public class User(int id)
 
 public enum VoteValue
 {
-    Markup, //       добавляется при первоначальной разметке (+1.1) (может не стоит различать это и подтверждение)
     Confirmation, // добавляется, если пользователь нажал кнопку, что он согласен с разметкой (+1)
-    Usage, //        добавляется, если пользователь использовал эту разметку и не голосовал против (+0.01)
     Against, //      добавляется, если пользователь проголосовал против (-1)
+    // Markup, //       добавляется при первоначальной разметке (+1.1) (может не стоит различать это и подтверждение)
+    // Usage, //        добавляется, если пользователь использовал эту разметку и не голосовал против (+0.01)
+}
+
+public static class VoteValueExtensions
+{
+    public static float Cost(this VoteValue value)
+    {
+        return value switch
+        {
+            VoteValue.Confirmation => 1,
+            VoteValue.Against => -1,
+            // VoteValue.Markup => 1.1f,
+            // VoteValue.Usage => 0.01f,
+            _ => throw new NotImplementedException($"нужно прописать цену голоса типа {value}")
+        };
+    }
 }
