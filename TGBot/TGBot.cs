@@ -8,6 +8,7 @@ using ApiMethods;
 using System.Net;
 using System;
 using System.Text.RegularExpressions;
+using Database;
 using VkNet.Model.Attachments;
 using VkNet.Utils;
 
@@ -15,7 +16,7 @@ namespace TGBot;
 
 public class TGBot
 {
-    public TGBot(string token)
+    public TGBot(string token, DbAccessor dbAccessor)
     {
         bot = new TelegramBotClient(token, cancellationToken: cts.Token);
         me = bot.GetMe().Result;
@@ -24,7 +25,8 @@ public class TGBot
         bot.OnError += OnError;
         bot.OnMessage += OnMessage;
         bot.OnUpdate += OnUpdate;
-        Console.WriteLine($"{me.FirstName} запущен!");
+        this.dbAccessor = dbAccessor;
+        Console.WriteLine($"{me.FirstName} запущен на @Moody_24_bot!");
     }
 
     private readonly TelegramBotClient bot;
@@ -32,6 +34,7 @@ public class TGBot
     private readonly CancellationTokenSource cts = new();
     private readonly Dictionary<long, Authorization> authorizations = new();
     private readonly Dictionary<long, VkUser> users = new();
+    private readonly DbAccessor dbAccessor;
 
     private readonly ReplyKeyboardMarkup replyKeyboardStart = new(
         new List<KeyboardButton[]>
@@ -69,8 +72,8 @@ public class TGBot
         ResizeKeyboard = false
     };
 
-    private readonly InlineKeyboardMarkup inlineMoods = MoodExtensions.CreateInlineKeyboardMarkup();
-    private readonly InlineKeyboardMarkup inlineGenres = GenreExtensions.CreateInlineKeyboardMarkup();
+    // private readonly InlineKeyboardMarkup inlineMoods = MoodExtensions.CreateInlineKeyboardMarkup();
+    // private readonly InlineKeyboardMarkup inlineGenres = GenreExtensions.CreateInlineKeyboardMarkup();
 
     private async Task OnError(Exception exception, HandleErrorSource source)
     {
@@ -83,44 +86,47 @@ public class TGBot
         switch (update)
         {
             case { CallbackQuery: { } query }:
+            {
+                if (query.Data is null || query.Message is null) break;
+                var chatId = query.Message.Chat.Id;
+                if (!users.ContainsKey(chatId))
                 {
-                    if (query.Data is null || query.Message is null) break;
-                    var chatId = query.Message.Chat.Id;
-                    if (!users.ContainsKey(chatId))
-                    {
-                        break;
-                    }
-                    if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
-                    {
-                        var mood = query.Data.Replace("Mood", "");
-                        await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
-                        users[chatId].AddMood(mood.MoodParse());
-                    }
-                    else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genre"))
-                    {
-                        var genre = query.Data.Replace("Genre", "");
-                        await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
-                        users[chatId].AddGenre(genre.GenreParse());
-                    }
-                    else if (query.Data.StartsWith("accept"))
-                    {
-                        if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Moods"))
-                        {
-                            await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
-                            users[chatId].AreMoodsSelected = true;
-                        }
-                        else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genres"))
-                        {
-                            await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
-                            users[chatId].AreGenresSelected = true;
-                        }
-                        else break;
-
-                        await GetPlayList(chatId);
-                    }
-
                     break;
                 }
+
+                if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
+                {
+                    var mood = query.Data.Replace("Mood", "");
+                    await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
+                    // TODO: добавить парсинг
+                    // users[chatId].AddMood(mood.MoodParse());
+                }
+                else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genre"))
+                {
+                    var genre = query.Data.Replace("Genre", "");
+                    await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
+                    // TODO: добавить парсинг
+                    // users[chatId].AddGenre(genre.GenreParse());
+                }
+                else if (query.Data.StartsWith("accept"))
+                {
+                    if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Moods"))
+                    {
+                        await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
+                        users[chatId].AreMoodsSelected = true;
+                    }
+                    else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genres"))
+                    {
+                        await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
+                        users[chatId].AreGenresSelected = true;
+                    }
+                    else break;
+
+                    await GetPlayList(chatId);
+                }
+
+                break;
+            }
 
             default:
                 Console.WriteLine($"Не обрабатывается тип {update.Type}");
@@ -154,21 +160,21 @@ public class TGBot
         switch (command)
         {
             case "/start":
-                {
-                    await SendStartMessage(msg.Chat.Id);
-                    break;
-                }
+            {
+                await SendStartMessage(msg.Chat.Id);
+                break;
+            }
             case "/login":
-                {
-                    await StartAuthorization(msg.Chat.Id);
-                    break;
-                }
+            {
+                await StartAuthorization(msg.Chat.Id);
+                break;
+            }
             case "/playlist":
-                {
-                    Console.WriteLine(msg.Chat.Id);
-                    await GetPlayList(msg.Chat.Id);
-                    break;
-                }
+            {
+                Console.WriteLine(msg.Chat.Id);
+                await GetPlayList(msg.Chat.Id);
+                break;
+            }
         }
     }
 
@@ -198,9 +204,10 @@ public class TGBot
         if (authorization.Login is null)
         {
             if (!(Regex.IsMatch(message.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$") ||
-                Regex.IsMatch(message.Text, @"^\+?[1-9]\d{8,14}$")))
+                  Regex.IsMatch(message.Text, @"^\+?[1-9]\d{8,14}$")))
             {
-                await bot.SendMessage(message.Chat.Id, "Неверный формат логина. Пожалуйста, введите корректный логин (почта или номер телефона).");
+                await bot.SendMessage(message.Chat.Id,
+                    "Неверный формат логина. Пожалуйста, введите корректный логин (почта или номер телефона).");
                 return;
             }
 
@@ -238,7 +245,8 @@ public class TGBot
         }
         else
         {
-            await bot.SendMessage(chatId, "Неправильный логин или пароль, попробуйте еще раз", replyMarkup: replyKeyboardLogin);
+            await bot.SendMessage(chatId, "Неправильный логин или пароль, попробуйте еще раз",
+                replyMarkup: replyKeyboardLogin);
             await StartAuthorization(chatId);
         }
     }
@@ -265,11 +273,15 @@ public class TGBot
                     await ConfirmAuthorization(chatId, false);
                     break;
 
-                case "Произведено слишком много попыток входа в этот аккаунт по паролю. Воспользуйтесь другим способом входа или попробуйте через несколько часов.":
-                    await bot.SendMessage(chatId, "Произведено слишком много попыток входа в этот аккаунт по паролю. Попробуйте через несколько часов.");
+                case
+                    "Произведено слишком много попыток входа в этот аккаунт по паролю. Воспользуйтесь другим способом входа или попробуйте через несколько часов."
+                    :
+                    await bot.SendMessage(chatId,
+                        "Произведено слишком много попыток входа в этот аккаунт по паролю. Попробуйте через несколько часов.");
                     authorization.SetCorrectData(false);
                     break;
             }
+
             return false;
         }
         catch (InvalidOperationException exception)
@@ -306,7 +318,9 @@ public class TGBot
                     await ConfirmAuthorization(chatId, false);
                     break;
 
-                case "Произведено слишком много попыток входа в этот аккаунт по паролю. Воспользуйтесь другим способом входа или попробуйте через несколько часов.":
+                case
+                    "Произведено слишком много попыток входа в этот аккаунт по паролю. Воспользуйтесь другим способом входа или попробуйте через несколько часов."
+                    :
                     await bot.SendMessage(chatId, exception.Message);
                     authorization.SetCorrectData(false);
                     break;
@@ -316,6 +330,7 @@ public class TGBot
                     await bot.SendMessage(chatId, "Введите код 2FA:");
                     break;
             }
+
             return false;
         }
         catch (InvalidOperationException exception)
@@ -336,24 +351,27 @@ public class TGBot
             await StartAuthorization(chatId);
             return;
         }
-
+        
         if (!user.AreMoodsSelected)
         {
-            await bot.SendMessage(chatId, "Выберите настроение", replyMarkup: inlineMoods);
+            await bot.SendMessage(chatId, "Выберите настроение",
+                replyMarkup: dbAccessor.GetMoods().ToInlineKeyboardMarkup());
             return;
         }
 
         if (!user.AreGenresSelected)
         {
-            await bot.SendMessage(chatId, "Выберите жанры", replyMarkup: inlineGenres);
+            await bot.SendMessage(chatId, "Выберите жанры",
+                replyMarkup: dbAccessor.GetGenres().ToInlineKeyboardMarkup());
             return;
         }
 
         await bot.SendMessage(chatId, "Пока только ваши треки");
+        // TODO: обработка плейлиста
         var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
         await bot.SendMessage(chatId, tracks);
         Console.WriteLine(tracks);
-        var tracksList
+        // var tracksList
         user.ResetMoodsAndGenres();
     }
 
@@ -366,15 +384,14 @@ public class TGBot
             if (!DataBase.HasTrackInDataBase(track))
             {
                 await bot.SendMessage(chatId, $"{track.Title} - {track.Artist} данный трек не найден в базе данных." +
-                    $" Для продолжения работы необходимо указать настроение и жанр данного трека");
-                await bot.SendMessage(chatId, "Выберите настроение", replyMarkup: inlineMoods);
-                await bot.SendMessage(chatId, "Выберите жанр", replyMarkup: inlineGenres);
+                                              $" Для продолжения работы необходимо указать настроение и жанр данного трека");
+                await bot.SendMessage(chatId, "Выберите настроение", replyMarkup: dbAccessor.GetMoods().ToInlineKeyboardMarkup());
+                await bot.SendMessage(chatId, "Выберите жанр", replyMarkup: dbAccessor.GetGenres().ToInlineKeyboardMarkup());
                 //DataBase.AddTrackToDataBase(track, genre, mood);
             }
-           
+
             if (DataBase.IsRightTrack(track))
                 users[chatId].VkApi.AddTrackToPlaylist(track, playlist);
         }
-
     }
 }
