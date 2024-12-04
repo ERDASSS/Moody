@@ -353,7 +353,8 @@ public class TGBot
         var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
         await bot.SendMessage(chatId, tracks);
         Console.WriteLine(tracks);
-        var tracksList
+        //var tracksList = users[chatId].VkApi.GetFavoriteTracks();
+        //await CreatePlaylist(tracksList, chatId);
         user.ResetMoodsAndGenres();
     }
 
@@ -375,6 +376,5 @@ public class TGBot
             if (DataBase.IsRightTrack(track))
                 users[chatId].VkApi.AddTrackToPlaylist(track, playlist);
         }
-
     }
 }
