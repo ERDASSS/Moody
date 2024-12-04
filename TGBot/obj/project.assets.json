@@ -2483,19 +2483,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\admin\\.nuget\\packages\\": {}
+    "C:\\Users\\com12\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\code\\sync_code\\c_sh\\oop\\_project\\TGBot\\TGBot.csproj",
+      "projectUniqueName": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\TGBot.csproj",
       "projectName": "TGBot",
-      "projectPath": "D:\\code\\sync_code\\c_sh\\oop\\_project\\TGBot\\TGBot.csproj",
-      "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-      "outputPath": "D:\\code\\sync_code\\c_sh\\oop\\_project\\TGBot\\obj\\",
+      "projectPath": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\TGBot.csproj",
+      "packagesPath": "C:\\Users\\com12\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\com12\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -2509,11 +2514,11 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\code\\sync_code\\c_sh\\oop\\_project\\Api_Methods\\ApiMethods.csproj": {
-              "projectPath": "D:\\code\\sync_code\\c_sh\\oop\\_project\\Api_Methods\\ApiMethods.csproj"
+            "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\ApiMethods.csproj": {
+              "projectPath": "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\ApiMethods.csproj"
             },
-            "D:\\code\\sync_code\\c_sh\\oop\\_project\\Database\\Database.csproj": {
-              "projectPath": "D:\\code\\sync_code\\c_sh\\oop\\_project\\Database\\Database.csproj"
+            "C:\\Users\\com12\\source\\repos\\Moody\\Database\\Database.csproj": {
+              "projectPath": "C:\\Users\\com12\\source\\repos\\Moody\\Database\\Database.csproj"
             }
           }
         }
@@ -2554,7 +2559,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

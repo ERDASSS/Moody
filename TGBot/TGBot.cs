@@ -90,14 +90,14 @@ public class TGBot
                 if (query.Data is null || query.Message is null) break;
                 var chatId = query.Message.Chat.Id;
                 if (!users.ContainsKey(chatId))
-                {
                     break;
-                }
-
+                
+                
                 if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
                 {
                     var mood = query.Data.Replace("Mood", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
+                    users[chatId].ParseParameter($"Mood:");
                     // TODO: добавить парсинг
                     // users[chatId].AddMood(mood.MoodParse());
                 }
@@ -105,6 +105,7 @@ public class TGBot
                 {
                     var genre = query.Data.Replace("Genre", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
+                    users[chatId].ParseParameter($"Genre:");
                     // TODO: добавить парсинг
                     // users[chatId].AddGenre(genre.GenreParse());
                 }
@@ -366,32 +367,38 @@ public class TGBot
             return;
         }
 
-        await bot.SendMessage(chatId, "Пока только ваши треки");
+        //await bot.SendMessage(chatId, "Пока только ваши треки");
         // TODO: обработка плейлиста
-        var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
-        await bot.SendMessage(chatId, tracks);
-        Console.WriteLine(tracks);
+        //var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
+        //CreatePlaylist(chatId);
+
+        //await bot.SendMessage(chatId, tracks);
+
+        //Console.WriteLine(tracks);
         // var tracksList
         user.ResetMoodsAndGenres();
     }
 
-    private async void CreatePlaylist(VkCollection<VkNet.Model.Attachments.Audio> tracksList, long chatId)
+    private async void CreatePlaylist(long chatId)
     {
-        var playlist = users[chatId].VkApi.CreateEmptyPlaylist("Избранные треки по настроению...");
+        var favouriteTracks = users[chatId].VkApi.GetFavoriteTracks();
+        var choosedTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, users[chatId].Filter);
+        var playlist = users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "",  choosedTracks);
+        
 
-        foreach (var track in tracksList)
-        {
-            if (!DataBase.HasTrackInDataBase(track))
-            {
-                await bot.SendMessage(chatId, $"{track.Title} - {track.Artist} данный трек не найден в базе данных." +
-                                              $" Для продолжения работы необходимо указать настроение и жанр данного трека");
-                await bot.SendMessage(chatId, "Выберите настроение", replyMarkup: dbAccessor.GetMoods().ToInlineKeyboardMarkup());
-                await bot.SendMessage(chatId, "Выберите жанр", replyMarkup: dbAccessor.GetGenres().ToInlineKeyboardMarkup());
-                //DataBase.AddTrackToDataBase(track, genre, mood);
-            }
+        //foreach (var track in tracksList)
+        //{
+        //    if (!DataBase.HasTrackInDataBase(track))
+        //    {
+        //        await bot.SendMessage(chatId, $"{track.Title} - {track.Artist} данный трек не найден в базе данных." +
+        //                                      $" Для продолжения работы необходимо указать настроение и жанр данного трека");
+        //        await bot.SendMessage(chatId, "Выберите настроение", replyMarkup: dbAccessor.GetMoods().ToInlineKeyboardMarkup());
+        //        await bot.SendMessage(chatId, "Выберите жанр", replyMarkup: dbAccessor.GetGenres().ToInlineKeyboardMarkup());
+        //        //DataBase.AddTrackToDataBase(track, genre, mood);
+        //    }
 
-            if (DataBase.IsRightTrack(track))
-                users[chatId].VkApi.AddTrackToPlaylist(track, playlist);
-        }
+        //    if (DataBase.IsRightTrack(track))
+        //        users[chatId].VkApi.AddTrackToPlaylist(track, playlist);
+        //}
     }
 }

@@ -69,16 +69,17 @@ namespace ApiMethods
             => vkApi.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = GetUserId() });
 
         
-        public AudioPlaylist CreatePlaylist(string playListName, VkCollection<Audio> songList = null)
+        public AudioPlaylist CreatePlaylist(string playListName,
+            string description = null, IEnumerable<Audio> songList = null)
         {
-            var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName);
             var songListInVkFormat = CreateSongListVkFormat(songList);
+            var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName, description, songListInVkFormat);
 
-            if (songListInVkFormat != null)
-            {
-                foreach (var song in songListInVkFormat)
-                    vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, song.Split());
-            }
+            //if (songListInVkFormat != null)
+            //{
+            //    foreach (var song in songListInVkFormat)
+            //        vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, song.Split());
+            //}
 
             return playlist;
         }
@@ -95,16 +96,10 @@ namespace ApiMethods
             vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, trackInVkFormat);
         }
 
-        private string[] CreateSongListVkFormat(VkCollection<Audio> songCollection)
-        {
-            var songToVkFormat = new StringBuilder();
-
+        private IEnumerable<string> CreateSongListVkFormat(IEnumerable<Audio> songCollection)
+        { 
             foreach (var song in songCollection)
-                songToVkFormat.Append($"{GetUserId()}_{song.Id},");
-
-            songToVkFormat.Length--;
-
-            return songToVkFormat.ToString().Split(',');
+                yield return $"{GetUserId()}_{song.Id},";
         }
 
     }
