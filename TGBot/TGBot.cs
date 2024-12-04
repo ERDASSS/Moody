@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using Database;
 using VkNet.Model.Attachments;
 using VkNet.Utils;
+using Database.db_models;
 
 namespace TGBot;
 
@@ -30,7 +31,7 @@ public class TGBot
     }
 
     private readonly TelegramBotClient bot;
-    private readonly User me;
+    private readonly Telegram.Bot.Types.User me;
     private readonly CancellationTokenSource cts = new();
     private readonly Dictionary<long, Authorization> authorizations = new();
     private readonly Dictionary<long, VkUser> users = new();
@@ -97,17 +98,17 @@ public class TGBot
                 {
                     var mood = query.Data.Replace("Mood", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
-                    users[chatId].ParseParameter($"Mood:");
-                    // TODO: добавить парсинг
-                    // users[chatId].AddMood(mood.MoodParse());
+
+                    // TODO: написать метод по доставанию id из бд
+                    users[chatId].AddMood((Mood)users[chatId].ParseParameter($"Mood:id:{mood}"));
                 }
                 else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genre"))
                 {
                     var genre = query.Data.Replace("Genre", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
-                    users[chatId].ParseParameter($"Genre:");
-                    // TODO: добавить парсинг
-                    // users[chatId].AddGenre(genre.GenreParse());
+                    
+                    // TODO: написать метод по доставанию id из бд
+                    users[chatId].AddGenre((Genre)users[chatId].ParseParameter($"Genre:id:{genre}"));
                 }
                 else if (query.Data.StartsWith("accept"))
                 {
@@ -370,7 +371,7 @@ public class TGBot
         //await bot.SendMessage(chatId, "Пока только ваши треки");
         // TODO: обработка плейлиста
         //var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
-        //CreatePlaylist(chatId);
+        CreatePlaylist(chatId);
 
         //await bot.SendMessage(chatId, tracks);
 

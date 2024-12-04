@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\com12\\source\\repos\\Moody\\Database\\Database.csproj": {}
+    "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\Database.csproj": {}
   },
   "projects": {
-    "C:\\Users\\com12\\source\\repos\\Moody\\Database\\Database.csproj": {
+    "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\Database.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\com12\\source\\repos\\Moody\\Database\\Database.csproj",
+        "projectUniqueName": "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\Database.csproj",
         "projectName": "Database",
-        "projectPath": "C:\\Users\\com12\\source\\repos\\Moody\\Database\\Database.csproj",
+        "projectPath": "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\Database.csproj",
         "packagesPath": "C:\\Users\\com12\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\com12\\source\\repos\\Moody\\Database\\obj\\",
+        "outputPath": "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -48,9 +48,8 @@ public class VkUser
     {
         var parts = input.Split(':');
         if (parts.Length < 3)
-        {
             throw new ArgumentException("Неверный формат строки");
-        }
+        
 
         var type = parts[0];
         var id = int.Parse(parts[1]);
