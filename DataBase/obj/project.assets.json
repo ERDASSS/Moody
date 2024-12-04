@@ -2009,5 +2009,13 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file D:\\code\\sync_code\\c_sh\\oop\\_project\\Database\\obj\\project.nuget.cache : Found invalid data while decoding."
+    }
+  ]
 }

@@ -51,7 +51,7 @@ public class DbAccessor
 
     public List<Genre> GetGenres()
     {
-        return GetParameterValues(MoodParameter.Instance)
+        return GetParameterValues(GenreParameter.Instance)
             .Select(pv => new Genre(pv.Id, pv.Name, pv.Description))
             .ToList();
         // TODO: исправить этот ужас
