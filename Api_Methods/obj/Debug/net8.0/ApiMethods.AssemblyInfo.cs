@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ApiMethods")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c81bcd3d44203707daf428bf098ca659fc0f1a39")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1ca832495dbfcf3983d5c207d73b7e1ff28bd901")]
 [assembly: System.Reflection.AssemblyProductAttribute("ApiMethods")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ApiMethods")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
