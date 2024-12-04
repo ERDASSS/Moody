@@ -16,45 +16,47 @@ class Program
         services.AddAudioBypass();
         var api = new VkApi(services);
 
-        //api.Authorize(new ApiAuthParams
-        //{
-        //    AccessToken = ""
-        //});
-        Console.WriteLine("Введите логин");
-        var login = Console.ReadLine();
-        Console.WriteLine("Введите пароль");
-        var password = Console.ReadLine();
-        Console.WriteLine("Есть ли двух факторка? [Y]|[N]");
-        var response = Console.ReadLine();
-        var flag = false;
-        if (response == "Y")
-            flag = true;
+        api.Authorize(new ApiAuthParams
+        {
+            ApplicationId = 52614150,
+            AccessToken = "",
+            Settings = Settings.Audio
+        });
+        //Console.WriteLine("Введите логин");
+        //var login = Console.ReadLine();
+        //Console.WriteLine("Введите пароль");
+        //var password = Console.ReadLine();
+        //Console.WriteLine("Есть ли двух факторка? [Y]|[N]");
+        //var response = Console.ReadLine();
+        //var flag = false;
+        //if (response == "Y")
+        //    flag = true;
 
-        if (flag)
-            api.Authorize(new ApiAuthParams
-            {
-                ApplicationId = 52614150,
-                Login = login,
-                Password = password,
-                TwoFactorAuthorization = new Func<string>(() =>
-                {
-                    Console.WriteLine("Введите код 2FA:");
-                    var code = Console.ReadLine();
-                    return code;
-                }),
-                Settings = Settings.All
-            });
-        else
-            api.Authorize(new ApiAuthParams
-            {
-                ApplicationId = 52614150,
-                Login = login,
-                Password = password,
-                Settings = Settings.All
-            });
+        //if (flag)
+        //    api.Authorize(new ApiAuthParams
+        //    {
+        //        ApplicationId = 52614150,
+        //        Login = login,
+        //        Password = password,
+        //        TwoFactorAuthorization = new Func<string>(() =>
+        //        {
+        //            Console.WriteLine("Введите код 2FA:");
+        //            var code = Console.ReadLine();
+        //            return code;
+        //        }),
+        //        Settings = Settings.All
+        //    });
+        //else
+        //    api.Authorize(new ApiAuthParams
+        //    {
+        //        ApplicationId = 52614150,
+        //        Login = login,
+        //        Password = password,
+        //        Settings = Settings.All
+        //    });
 
         var id = api.UserId;
-        //Console.WriteLine(api.Token);
+        Console.WriteLine(id);
         ////var song = "318348717_456239095".Split();
         ////api.Audio.CreatePlaylist(318348717, "СЮДАА", "", song);
         var musicList = api.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = id });

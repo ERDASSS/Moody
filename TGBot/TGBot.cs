@@ -177,6 +177,12 @@ public class TGBot
                 await GetPlayList(msg.Chat.Id);
                 break;
             }
+            case "/test":
+            {
+                await AuthorizeWithToken(msg.Chat.Id);
+                break;
+            }
+
         }
     }
 
@@ -189,6 +195,21 @@ public class TGBot
     private async Task SendStartMessage(long chatId)
     {
         await bot.SendMessage(chatId, "Добро пожаловать! Пожалуйста, залогиньтесь.", replyMarkup: replyKeyboardLogin);
+    }
+
+    private async Task AuthorizeWithToken(long chatId)
+    {
+        await bot.SendMessage(chatId, "Тестовый режим входа по токену");
+        try
+        {
+            users[chatId].VkApi.AuthorizeWithToken();
+        }
+        catch (VkAuthException exception)
+        {
+            Console.WriteLine(exception);
+            return;
+        }
+        await ConfirmAuthorization(chatId, true);
     }
 
     private async Task StartAuthorization(long chatId)
@@ -371,7 +392,7 @@ public class TGBot
         //await bot.SendMessage(chatId, "Пока только ваши треки");
         // TODO: обработка плейлиста
         //var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
-        CreatePlaylist(chatId);
+        //CreatePlaylist(chatId);
 
         //await bot.SendMessage(chatId, tracks);
 

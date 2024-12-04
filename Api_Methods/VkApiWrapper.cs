@@ -21,25 +21,6 @@ namespace ApiMethods
             vkApi = new VkApi(services);
         }
 
-        //public async void AuthorizeWith2FA(string login, string password)
-        //{
-        //    await vkApi.AuthorizeAsync(new ApiAuthParams
-        //    {
-        //        ApplicationId = applicationId,
-        //        Login = login,
-        //        Password = password,
-        //        TwoFactorAuthorization = new Func<string>(() =>
-        //        {
-        //            //Пока не знаю как будет работать бот
-        //            //TODO исправить это недразумение 
-        //            Console.WriteLine("Введите код 2FA:");
-        //            var code = Console.ReadLine();
-        //            return code;
-        //        }),
-        //        Settings = Settings.Audio
-        //    });
-        //}
-
         public void AuthorizeWith2FA(string login, string password, string code)
         {
             vkApi.Authorize(new ApiAuthParams
@@ -49,6 +30,14 @@ namespace ApiMethods
                 Password = password,
                 TwoFactorAuthorization = new Func<string>(() => code),
                 Settings = Settings.Audio
+            });
+        }
+
+        public void AuthorizeWithToken()
+        {
+            vkApi.Authorize(new ApiAuthParams
+            {
+                AccessToken = ""
             });
         }
 
