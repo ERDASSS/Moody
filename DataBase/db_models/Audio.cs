@@ -34,28 +34,42 @@ public class DbAudioParameter // например настроение или ж
     public string Name { get; } = name;
 }
 
-public class Mood : DbAudioParameter
+public class MoodParameter() : DbAudioParameter(1, "mood")
 {
-    public static Mood Instance { get; } = new Mood();
-
-    public Mood() : base(1, "mood")
-    {
-    }
+    public static MoodParameter Instance { get; } = new MoodParameter();
 }
 
-public class Genre : DbAudioParameter
+public class GenreParameter() : DbAudioParameter(2, "genre")
 {
-    public static Genre Instance { get; } = new Genre();
-
-    public Genre() : base(2, "genre")
-    {
-    }
+    public static GenreParameter Instance { get; } = new GenreParameter();
 }
 
-public class DbAudioParameterValue(int id, string name) // например веселая или спокойная для настроения
+public class DbAudioParameterValue(int id, int parameterId, string name, string? description)
+    // например "веселая" или "спокойная" для настроения
+    // или "рок" для жанра
 {
     public int Id { get; } = id;
+    public int ParameterId { get; } = parameterId;
     public string Name { get; } = name;
+    public string? Description { get; } = description;
+
+    public virtual DbAudioParameter GetParameter()
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class Mood(int id, string name, string? description)
+    : DbAudioParameterValue(id, MoodParameter.Instance.Id, name, description)
+{
+    public override DbAudioParameter GetParameter() => MoodParameter.Instance;
+}
+
+public class Genre(int id, string name, string? description)
+    : DbAudioParameterValue(id, GenreParameter.Instance.Id, name, description)
+{
+    public override DbAudioParameter GetParameter() => GenreParameter.Instance;
+
 }
 
 public class AudioParameterValues

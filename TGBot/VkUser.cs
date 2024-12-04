@@ -1,4 +1,5 @@
 ﻿using ApiMethods;
+using Database.db_models;
 
 namespace TGBot;
 
