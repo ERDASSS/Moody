@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\com12\\source\\repos\\Moody\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|c:\\users\\com12\\source\\repos\\moody\\tgbot\\vkuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|solutionrelative:tgbot\\vkuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|c:\\users\\com12\\source\\repos\\moody\\tgbot\\tgbot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|solutionrelative:tgbot\\tgbot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -11,28 +15,28 @@
       "RelativeMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|solutionrelative:tgbot\\database.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|c:\\users\\com12\\source\\repos\\moody\\tgbot\\mood.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|solutionrelative:tgbot\\mood.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|c:\\users\\com12\\source\\repos\\moody\\tgbot\\vkuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|solutionrelative:tgbot\\vkuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|c:\\users\\com12\\source\\repos\\moody\\database\\db_models\\audio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|solutionrelative:database\\db_models\\audio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5F2246AE-6327-4627-AC3E-5BE080390556}|Api_Methods\\ApiMethods.csproj|c:\\users\\com12\\source\\repos\\moody\\api_methods\\vkapiwrapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5F2246AE-6327-4627-AC3E-5BE080390556}|Api_Methods\\ApiMethods.csproj|solutionrelative:api_methods\\vkapiwrapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|c:\\users\\com12\\source\\repos\\moody\\tgbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|solutionrelative:tgbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|c:\\users\\com12\\source\\repos\\moody\\database\\db_models\\audio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|solutionrelative:database\\db_models\\audio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|c:\\users\\com12\\source\\repos\\moody\\database\\dbaccessor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|solutionrelative:database\\dbaccessor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|c:\\users\\com12\\source\\repos\\moody\\database\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|solutionrelative:database\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|c:\\users\\com12\\source\\repos\\moody\\tgbot\\mood.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|solutionrelative:tgbot\\mood.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|c:\\users\\com12\\source\\repos\\moody\\tgbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|solutionrelative:tgbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|c:\\users\\com12\\source\\repos\\moody\\tgbot\\genre.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -41,10 +45,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|c:\\users\\com12\\source\\repos\\moody\\tgbot\\authorization.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EB514144-6652-4445-BCF7-5112489ABEE1}|TGBot\\TGBot.csproj|solutionrelative:tgbot\\authorization.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|c:\\users\\com12\\source\\repos\\moody\\database\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EEE9B426-E5CB-49C6-AC16-020321CACEEB}|Database\\Database.csproj|solutionrelative:database\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EE5EEE78-F2A7-425F-AC2F-9788B22A1538}|test1\\test1.csproj|c:\\users\\com12\\source\\repos\\moody\\test1\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -58,7 +58,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -66,20 +66,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 3,
               "Title": "Audio.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\DataBase\\db_models\\Audio.cs",
               "RelativeDocumentMoniker": "DataBase\\db_models\\Audio.cs",
               "ToolTip": "C:\\Users\\com12\\source\\repos\\Moody\\DataBase\\db_models\\Audio.cs",
               "RelativeToolTip": "DataBase\\db_models\\Audio.cs",
-              "ViewState": "AgIAACgAAAAAAAAAAAApwDkAAAAsAAAAAAAAAA==",
+              "ViewState": "AgIAADQAAAAAAAAAAAAmwD4AAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-04T15:27:24.669Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-04T15:27:24.669Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 6,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\DataBase\\Program.cs",
               "RelativeDocumentMoniker": "DataBase\\Program.cs",
@@ -87,57 +86,54 @@
               "RelativeToolTip": "DataBase\\Program.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-04T15:27:15.374Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-04T15:27:15.374Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 5,
               "Title": "DbAccessor.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\DataBase\\DbAccessor.cs",
               "RelativeDocumentMoniker": "DataBase\\DbAccessor.cs",
               "ToolTip": "C:\\Users\\com12\\source\\repos\\Moody\\DataBase\\DbAccessor.cs",
               "RelativeToolTip": "DataBase\\DbAccessor.cs",
-              "ViewState": "AgIAAOwAAAAAAAAAAAAYwPkAAAAlAAAAAAAAAA==",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAwwBQAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-04T15:26:35.164Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-04T15:26:35.164Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
               "Title": "VkUser.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\VkUser.cs",
               "RelativeDocumentMoniker": "TGBot\\VkUser.cs",
               "ToolTip": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\VkUser.cs",
               "RelativeToolTip": "TGBot\\VkUser.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAA1wA0AAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAACwAAAAAAAAAAAAwwEQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-26T16:51:21.738Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "DataBase.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\DataBase.cs",
               "RelativeDocumentMoniker": "TGBot\\DataBase.cs",
               "ToolTip": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\DataBase.cs",
               "RelativeToolTip": "TGBot\\DataBase.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABQAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAoAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-26T15:15:23.81Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-26T15:15:23.81Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "TGBot.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\TGBot.cs",
               "RelativeDocumentMoniker": "TGBot\\TGBot.cs",
               "ToolTip": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\TGBot.cs",
               "RelativeToolTip": "TGBot\\TGBot.cs",
-              "ViewState": "AgIAAMMAAAAAAAAAAADwv2UAAAA5AAAAAAAAAA==",
+              "ViewState": "AgIAAHwBAAAAAAAAAAAwwJQBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-13T17:57:20.305Z",
               "EditorCaption": ""
@@ -150,14 +146,13 @@
               "RelativeDocumentMoniker": "Api_Methods\\VkApiWrapper.cs",
               "ToolTip": "C:\\Users\\com12\\source\\repos\\Moody\\Api_Methods\\VkApiWrapper.cs",
               "RelativeToolTip": "Api_Methods\\VkApiWrapper.cs",
-              "ViewState": "AgIAAFYAAAAAAAAAAAAuwDwAAAAkAAAAAAAAAA==",
+              "ViewState": "AgIAAEMAAAAAAAAAAAAcwFIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-13T14:29:51.394Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-13T14:29:51.394Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\Program.cs",
               "RelativeDocumentMoniker": "TGBot\\Program.cs",
@@ -165,25 +160,23 @@
               "RelativeToolTip": "TGBot\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-13T17:57:19.128Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-13T17:57:19.128Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 7,
               "Title": "Mood.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\Mood.cs",
               "RelativeDocumentMoniker": "TGBot\\Mood.cs",
               "ToolTip": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\Mood.cs",
               "RelativeToolTip": "TGBot\\Mood.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAcAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABcAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-13T17:57:13.256Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-13T17:57:13.256Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "Genre.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\Genre.cs",
               "RelativeDocumentMoniker": "TGBot\\Genre.cs",
@@ -191,12 +184,11 @@
               "RelativeToolTip": "TGBot\\Genre.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-13T17:56:39.485Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-13T17:56:39.485Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "Authorization.cs",
               "DocumentMoniker": "C:\\Users\\com12\\source\\repos\\Moody\\TGBot\\Authorization.cs",
               "RelativeDocumentMoniker": "TGBot\\Authorization.cs",
@@ -204,8 +196,7 @@
               "RelativeToolTip": "TGBot\\Authorization.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-13T17:56:17.504Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-13T17:56:17.504Z"
             },
             {
               "$type": "Document",
@@ -217,8 +208,7 @@
               "RelativeToolTip": "test1\\Program.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAQwBEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-13T15:52:15.223Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-13T15:52:15.223Z"
             }
           ]
         }

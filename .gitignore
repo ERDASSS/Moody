@@ -1,2 +1,6 @@
 .vs/
 .idea/
+*/obj/
+*/bin/
+Database/gitignore/
+!/TGBot/bin/Debug/net8.0/moody.db
