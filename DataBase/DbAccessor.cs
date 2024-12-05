@@ -92,7 +92,7 @@ public class DbAccessor
     }
 
 
-    private void SaveAudioInDb(Audio vkAudio, SQLiteConnection connection)
+    public void SaveAudioInDb(Audio vkAudio, SQLiteConnection connection)
     {
         if (connection.State != System.Data.ConnectionState.Open)
             throw new InvalidOperationException("Подключение к базе данных должно быть открыто.");

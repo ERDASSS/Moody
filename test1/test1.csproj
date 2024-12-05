@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Api_Methods\ApiMethods.csproj" />
+    <ProjectReference Include="..\Database\Database.csproj" />
+    <ProjectReference Include="..\TGBot\TGBot.csproj" />
   </ItemGroup>
 
 </Project>

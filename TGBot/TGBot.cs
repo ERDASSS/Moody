@@ -194,11 +194,13 @@ public class TGBot
 
     private async Task SendStartMessage(long chatId)
     {
-        await bot.SendMessage(chatId, "Добро пожаловать! Пожалуйста, залогиньтесь.", replyMarkup: replyKeyboardLogin);
+        await bot.SendMessage(chatId, "Добро пожаловать! Пожалуйста, залогиньтесь во ВКонтакте. Для этого введите команду /login");
+        await bot.SendMessage(chatId, "Внимание! Бот не собирает ваши личные данные. Производится только только авторизация", replyMarkup: replyKeyboardLogin);
     }
 
     private async Task AuthorizeWithToken(long chatId)
     {
+        authorizations[chatId] = new Authorization();
         await bot.SendMessage(chatId, "Тестовый режим входа по токену");
         try
         {
@@ -216,7 +218,7 @@ public class TGBot
     {
         authorizations[chatId] = new Authorization();
         authorizations[chatId].SetCorrectData(true);
-        await bot.SendMessage(chatId, "Введите логин", replyMarkup: replyKeyboardLogin);
+        await bot.SendMessage(chatId, "Введите логин (номер телефона или почта)", replyMarkup: replyKeyboardLogin);
     }
 
     private async Task ProcessAuthorizations(Message message)
@@ -242,10 +244,10 @@ public class TGBot
         if (authorization.Password is null)
         {
             authorization.AddPassword(message.Text);
-            await bot.SendMessage(message.Chat.Id, "Производится авторизация");
+            await bot.SendMessage(message.Chat.Id, "Попытка авторизации");
             var wasAuthorizationSuccessful = await TryAuthorizeWithout2FA(message.Chat.Id);
             if (!wasAuthorizationSuccessful && authorization.IsCorrectData == true)
-                await bot.SendMessage(message.Chat.Id, "Введите код 2FA:");
+                await bot.SendMessage(message.Chat.Id, "Введите код двух факторной авторизации:");
             return;
         }
 
@@ -389,12 +391,12 @@ public class TGBot
             return;
         }
 
-        //await bot.SendMessage(chatId, "Пока только ваши треки");
+        await bot.SendMessage(chatId, "Пока только ваши треки");
         // TODO: обработка плейлиста
-        //var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
+        var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
         //CreatePlaylist(chatId);
 
-        //await bot.SendMessage(chatId, tracks);
+        await bot.SendMessage(chatId, tracks);
 
         //Console.WriteLine(tracks);
         // var tracksList
