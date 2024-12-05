@@ -61,14 +61,13 @@ public class TGBot
         ResizeKeyboard = false
     };
 
-    private readonly ReplyKeyboardMarkup replyKeyboardPlaylist = new(
-        new List<KeyboardButton[]>
+    private readonly ReplyKeyboardMarkup replyKeyboardPlaylist = new(new List<KeyboardButton[]>
+    {
+        new[]
         {
-            new[]
-            {
-                new KeyboardButton("/playlist")
-            }
-        })
+            new KeyboardButton("/playlist")
+        }
+    })
     {
         ResizeKeyboard = false
     };
@@ -92,8 +91,8 @@ public class TGBot
                 var chatId = query.Message.Chat.Id;
                 if (!users.ContainsKey(chatId))
                     break;
-                
-                
+
+
                 if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
                 {
                     var mood = query.Data.Replace("Mood", "");
@@ -106,9 +105,9 @@ public class TGBot
                 {
                     var genre = query.Data.Replace("Genre", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
-                    
+
                     // TODO: написать метод по доставанию id из бд
-                    users[chatId].AddGenre((Genre)users[chatId].ParseParameter($"Genre:id:{genre}"));
+                    users[chatId].AddGenre((DbGenre)users[chatId].ParseParameter($"Genre:id:{genre}"));
                 }
                 else if (query.Data.StartsWith("accept"))
                 {
@@ -353,7 +352,7 @@ public class TGBot
             await StartAuthorization(chatId);
             return;
         }
-        
+
         if (!user.AreMoodsSelected)
         {
             await bot.SendMessage(chatId, "Выберите настроение",
@@ -384,8 +383,8 @@ public class TGBot
     {
         var favouriteTracks = users[chatId].VkApi.GetFavoriteTracks();
         var choosedTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, users[chatId].Filter);
-        var playlist = users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "",  choosedTracks);
-        
+        var playlist = users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "", choosedTracks);
+
 
         //foreach (var track in tracksList)
         //{

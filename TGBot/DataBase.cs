@@ -17,7 +17,7 @@ static class ParametersExtension
 
         return new InlineKeyboardMarkup(rows);
     }
-    public static InlineKeyboardMarkup ToInlineKeyboardMarkup(this IEnumerable<Genre> genres)
+    public static InlineKeyboardMarkup ToInlineKeyboardMarkup(this IEnumerable<DbGenre> genres)
     {
         var rows = genres
             .Select(mood => mood.Name)
@@ -31,7 +31,7 @@ static class ParametersExtension
 
 class DataBase
 {
-    public static void AddTrackToDataBase(Audio track, Genre genre = default, Mood mood = default)
+    public static void AddTrackToDataBase(Audio track, DbGenre dbGenre = default, Mood mood = default)
     {
         var trackName = track.Title;
         var trackAuthor = track.Artist;
@@ -47,7 +47,7 @@ class DataBase
         throw new NotImplementedException();
     }
 
-    public static bool IsRightTrack(Audio track, Genre genre = default, Mood mood = default)
+    public static bool IsRightTrack(Audio track, DbGenre dbGenre = default, Mood mood = default)
     {
         //проверяем подходит ли трек по настроению и жанру
         throw new NotImplementedException();
