@@ -72,9 +72,6 @@ public class TGBot
         ResizeKeyboard = false
     };
 
-    // private readonly InlineKeyboardMarkup inlineMoods = MoodExtensions.CreateInlineKeyboardMarkup();
-    // private readonly InlineKeyboardMarkup inlineGenres = GenreExtensions.CreateInlineKeyboardMarkup();
-
     private async Task OnError(Exception exception, HandleErrorSource source)
     {
         Console.WriteLine(exception);
@@ -92,14 +89,13 @@ public class TGBot
                 if (!users.ContainsKey(chatId))
                     break;
 
-
                 if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
                 {
                     var mood = query.Data.Replace("Mood", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
 
                     // TODO: написать метод по доставанию id из бд
-                    users[chatId].AddMood((Mood)users[chatId].ParseParameter($"Mood:id:{mood}"));
+                    users[chatId].AddMood((DbMood)users[chatId].ParseParameter($"Mood:id:{mood}"));
                 }
                 else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genre"))
                 {

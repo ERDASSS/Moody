@@ -41,27 +41,17 @@ public class DbAccessor
     }
 
 
-    public List<Mood> GetMoods()
-    {
-        return GetParameterValues(MoodParameter.Instance)
-            .Select(pv => new Mood(pv.Id, pv.Name, pv.Description))
-            .ToList();
-        // TODO: исправить этот ужас
-    }
+    public List<DbMood> GetMoods() => GetParameterValues<DbMood>();
+    public List<DbGenre> GetGenres() => GetParameterValues<DbGenre>();
 
-    public List<Genre> GetGenres()
+    /// <summary>
+    /// Получает все существующие значения данного параметра
+    /// (например по параметру "настроение" возвращает все существующие настроения)
+    /// </summary>
+    private List<TParameterValue> GetParameterValues<TParameterValue>()
+        where TParameterValue : DbAudioParameterValue
     {
-        return GetParameterValues(GenreParameter.Instance)
-            .Select(pv => new Genre(pv.Id, pv.Name, pv.Description))
-            .ToList();
-        // TODO: исправить этот ужас
-    }
-
-    private List<DbAudioParameterValue> GetParameterValues(DbAudioParameter parameter)
-    {
-        // получает все существующие значения данного параметра
-        // (например по параметру "настроение" возвращает все существующие настроения)
-
+        var parameter = DbAudioParameterValue.GetParameter<TParameterValue>();
         // todo: создать соединение один раз
         using var connection = new SQLiteConnection(ConnectionString);
         connection.Open();
@@ -75,8 +65,8 @@ public class DbAccessor
         command.Parameters.AddWithValue("@ParamId", parameter.Id);
 
         using var reader = command.ExecuteReader();
-        var parameterValues = new List<DbAudioParameterValue>();
 
+        var parameterValues = new List<TParameterValue>();
         while (reader.Read())
         {
             var id = reader.GetInt32(reader.GetOrdinal("value_id"));
@@ -85,7 +75,8 @@ public class DbAccessor
                 ? null
                 : reader.GetString(reader.GetOrdinal("description"));
 
-            parameterValues.Add(new DbAudioParameterValue(id, parameter.Id, name, description));
+            parameterValues.Add(DbAudioParameterValue.Create<TParameterValue>(id, parameter.Id, name, description));
+            // yield return DbAudioParameterValue.Create(id, parameter.Id, name, description);
         }
 
         return parameterValues;
@@ -172,8 +163,6 @@ public class DbAccessor
             LEFT JOIN parameter_values pv ON v.param_value_id = pv.value_id
             LEFT JOIN parameters p ON pv.param_id = p.param_id
             WHERE t.title = @Title AND a.name = @AuthorName";
-
-
         using var command = new SQLiteCommand(query, connection);
         command.Parameters.AddWithValue("@Title", vkAudio.Title);
         command.Parameters.AddWithValue("@AuthorName", vkAudio.Artist);
@@ -181,39 +170,42 @@ public class DbAccessor
         using var reader = command.ExecuteReader();
         if (!reader.Read())
             return null; // Аудио не найдено
+
         var trackId = reader.GetInt32(reader.GetOrdinal("track_id"));
         var title = reader.GetString(reader.GetOrdinal("title"));
         var author = new DbAuthor(
             reader.GetInt32(reader.GetOrdinal("author_id")),
             reader.GetString(reader.GetOrdinal("name"))
         );
+        var trackIds = new HashSet<int>(); // ожидается, что тут будет id ровно 1-го трека
 
-        var parameters = new AudioParameters();
-        //Собираем параметры
+        // Собираем голоса за параметры
+        var votes = new DbUsersByPvVv();
         do
         {
-            if (reader.IsDBNull(reader.GetOrdinal("param_name"))) continue;
+            trackIds.Add(trackId);
 
             // вытаскиваем параметр
             var paramId = reader.GetInt32(reader.GetOrdinal("param_id"));
             var paramName = reader.GetString(reader.GetOrdinal("param_name"));
             var param = new DbAudioParameter(paramId, paramName);
-            if (!parameters.Parameters.TryGetValue(param, out var values))
-            {
-                values = new AudioParameterValues();
-                parameters.Parameters[param] = values;
-            }
+            // if (!votes.TryGetValue(param, out var values))
+            // {
+            //     values = new Dictionary<>();
+            //     votes.Parameters[param] = values;
+            // }
 
             // его значение (и сохраняем параметер/значение)
             var paramValueId = reader.GetInt32(reader.GetOrdinal("value_id"));
             var paramValueName = reader.GetString(reader.GetOrdinal("value_name"));
             var paramValueDescription = reader.GetString(reader.GetOrdinal("description"));
-            var paramValue = new DbAudioParameterValue(paramValueId, paramId, paramValueName, paramValueDescription);
-            if (!values.Values.TryGetValue(paramValue, out var votes))
-            {
-                votes = new UsersVotes();
-                values.Values[paramValue] = votes;
-            }
+            // todo: выпилить описание, я передумал (или по крайней мере перенести его в отдельную таблицу)
+            var paramValue = DbAudioParameterValue.Create(paramValueId, paramId, paramValueName, paramValueDescription);
+            // if (!values.Values.TryGetValue(paramValue, out var votes))
+            // {
+            //     votes = new UsersVotes();
+            //     values.Values[paramValue] = votes;
+            // }
 
             // пользователя, проголосовавшего за это значение
             var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
@@ -222,21 +214,28 @@ public class DbAccessor
             // голос за это значение (и сохраняем параметер/значение/тип голоса)
             var voteId = reader.GetInt32(reader.GetOrdinal("vote_id"));
             var intVoteValue = reader.GetInt32(reader.GetOrdinal("vote_value"));
-            if (!Enum.IsDefined(typeof(VoteValue), 3))
-                throw new Exception($"у голоса с id:{voteId} неизвестное значение: {intVoteValue}");
+            if (!Enum.IsDefined(typeof(VoteValue), intVoteValue))
+                throw new Exception($"у голоса с id: {voteId} неизвестное значение: {intVoteValue}");
             var voteValue = (VoteValue)intVoteValue;
-            if (!votes.Votes.TryGetValue(voteValue, out var users))
-            {
-                users = new List<User>();
-                votes.Votes[voteValue] = users;
-            }
+            // if (!votes.Votes.TryGetValue(voteValue, out var users))
+            // {
+            //     users = new List<User>();
+            //     votes.Votes[voteValue] = users;
+            // }
 
-            // и наконец сохраняем параметер/значение/тип голоса/пользователи
+            // и наконец сохраняем значение/тип голоса/пользователи
 
-            users.Add(user);
+            votes[paramValue][voteValue].Add(user);
         } while (reader.Read());
 
-        return new DbAudio(trackId, title, author, parameters);
+        if (trackIds.Count != 1)
+        {
+            Console.WriteLine($"Предупреждение: в бд найдено более одного трека с названием '{vkAudio.Title}' " +
+                              $"и автором '{vkAudio.Artist}' " +
+                              $"(использованы параметры обоих)");
+        }
+
+        return new DbAudio(trackId, title, author, votes);
     }
 }
 
@@ -273,7 +272,7 @@ public class Filter
     {
         // если суммарный балл голосов > 0, то считаем, что аудио относится к данному настроению
         var score = 0.0;
-        var votes = dbAudio.Parameters.Parameters[MoodParameter.Instance].Values[targetMood].Votes;
+        var votes = dbAudio.Votes[targetMood];
         foreach (var voteValue in votes.Keys)
             score += voteValue.Cost() * votes[voteValue].Count;
         return score > 0;
@@ -282,7 +281,7 @@ public class Filter
     private bool CheckGenre(DbAudio dbAudio, DbAudioParameterValue targetGenre, bool considerSubgenres = true)
     {
         var score = 0.0;
-        var votes = dbAudio.Parameters.Parameters[MoodParameter.Instance].Values[targetGenre].Votes;
+        var votes = dbAudio.Votes[targetGenre];
         foreach (var voteValue in votes.Keys)
             score += voteValue.Cost() * votes[voteValue].Count;
         return score > 0;

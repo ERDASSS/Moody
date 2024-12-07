@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\Database.csproj": {}
+    "D:\\code\\sync_code\\c_sh\\oop\\_project\\Database\\Database.csproj": {}
   },
   "projects": {
-    "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\Database.csproj": {
+    "D:\\code\\sync_code\\c_sh\\oop\\_project\\Database\\Database.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\Database.csproj",
+        "projectUniqueName": "D:\\code\\sync_code\\c_sh\\oop\\_project\\Database\\Database.csproj",
         "projectName": "Database",
-        "projectPath": "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\Database.csproj",
-        "packagesPath": "C:\\Users\\com12\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\com12\\Source\\Repos\\Moody\\Database\\obj\\",
+        "projectPath": "D:\\code\\sync_code\\c_sh\\oop\\_project\\Database\\Database.csproj",
+        "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
+        "outputPath": "D:\\code\\sync_code\\c_sh\\oop\\_project\\Database\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\com12\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -78,7 +74,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
