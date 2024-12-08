@@ -11,10 +11,13 @@ public class DbAccessor
 {
     public string DbPath { get; }
     public string ConnectionString => $"Data Source={DbPath};Version=3;";
+    private SQLiteConnection _connection; // todo: заменить все connection на это поле, потом убрать _
 
     public DbAccessor(string dbPath = "moody.db")
     {
         DbPath = dbPath;
+        _connection = new SQLiteConnection(ConnectionString);
+        _connection.Open();
     }
 
     public IEnumerable<Audio> FilterAndSaveNewInDb(VkCollection<Audio> usersFavouriteAudios, Filter filter)
@@ -39,7 +42,6 @@ public class DbAccessor
                 yield return vkAudio;
         }
     }
-
 
     public List<DbMood> GetMoods() => GetParameterValues<DbMood>();
     public List<DbGenre> GetGenres() => GetParameterValues<DbGenre>();
@@ -81,7 +83,6 @@ public class DbAccessor
 
         return parameterValues;
     }
-
 
     public void SaveAudioInDb(Audio vkAudio, SQLiteConnection connection)
     {
@@ -154,6 +155,7 @@ public class DbAccessor
             FROM tracks t
             JOIN authors a ON t.author_id = a.author_id
             LEFT JOIN votes v ON t.track_id = v.track_id -- считываем голоса, если они есть (чтобы отличать отсутствующие треки от треков без голосов)
+            LEFT JOIN main.users u ON v.user_id = u.user_id
             LEFT JOIN parameter_values pv ON v.param_value_id = pv.value_id
             LEFT JOIN parameters p ON pv.param_id = p.param_id
             WHERE t.title = @Title AND a.name = @AuthorName";
@@ -209,7 +211,9 @@ public class DbAccessor
 
             // вытаскиваем пользователя, проголосовавшего за это значение
             var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
-            var user = new User(userId);
+            var chatId = reader.GetInt32(reader.GetOrdinal("chat_id"));
+            var username = reader.GetString(reader.GetOrdinal("username"));
+            var user = new DbUser(userId, chatId, username);
 
             // и наконец сохраняем значение/тип голоса/пользователи
             votes[paramValue][voteValue].Add(user);
@@ -221,6 +225,71 @@ public class DbAccessor
                               $"(использованы параметры обоих)");
 
         return new DbAudio(trackId, title, author, votes);
+    }
+
+
+    public void AddVote(
+        SQLiteConnection connection,
+        int audioId,
+        int parameterValueId,
+        VoteValue voteValue,
+        int userId)
+    {
+        const string query = @"
+        INSERT INTO votes (user_id, track_id, param_value_id, vote_value) 
+        VALUES (@UserId, @TrackId, @ParamValueId, @VoteValue)";
+
+        using var command = new SQLiteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@UserId", userId);
+        command.Parameters.AddWithValue("@TrackId", audioId);
+        command.Parameters.AddWithValue("@ParamValueId", parameterValueId);
+        command.Parameters.AddWithValue("@VoteValue", (int)voteValue);
+
+        command.ExecuteNonQuery();
+    }
+
+    public void AddOrUpdateUser(SQLiteConnection connection, int chatId, string username)
+    {
+        const string insertOrUpdateQuery = @"
+        INSERT INTO users (chat_id, username) VALUES (@ChatId, @Username)
+        ON CONFLICT(chat_id) DO UPDATE SET username = @Username";
+
+        using var authorCommand = new SQLiteCommand(insertOrUpdateQuery, connection);
+        authorCommand.Parameters.AddWithValue("@ChatId", chatId);
+        authorCommand.Parameters.AddWithValue("@Username", username);
+        authorCommand.ExecuteNonQuery();
+    }
+
+    // todo: сделать меньше дублирования (добавить метод для создания команды и сразу добавления в нее параметров)
+
+    public DbUser? GetUserByChatId(int chatId)
+    {
+        const string query = "SELECT user_id, chat_id, username FROM users WHERE chat_id = @ChatId";
+        using var command = new SQLiteCommand(query, _connection);
+        command.Parameters.AddWithValue("@ChatId", chatId);
+        return GetUserByUsername(command);
+    }
+
+    public DbUser? GetUserByUsername(string username)
+    {
+        using var command = new SQLiteCommand(
+            "SELECT user_id, chat_id, username FROM users WHERE chat_id = @Username",
+            _connection);
+        command.Parameters.AddWithValue("@ChatId", username);
+        return GetUserByUsername(command);
+    }
+
+    private DbUser? GetUserByUsername(SQLiteCommand command)
+    {
+        using var reader = command.ExecuteReader();
+        if (!reader.Read())
+            return null; // User not found
+        return new DbUser(
+            reader.GetInt32(reader.GetOrdinal("user_id")),
+            reader.GetInt32(reader.GetOrdinal("chat_id")),
+            reader.GetString(reader.GetOrdinal("username"))
+        );
     }
 }
 

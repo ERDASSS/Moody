@@ -23,7 +23,7 @@ public class DbUsersByPvVv :
     // Dictionary<DbAudioParameter,
     DefaultDictionary<DbAudioParameterValue,
         DefaultDictionary<VoteValue,
-            List<User>>>;
+            List<DbUser>>>;
 // >
 
 public class DbAudioParameter(int id, string name)
@@ -108,9 +108,11 @@ public class DbMood(int id, string name, string? description)
 public class DbGenre(int id, string name, string? description)
     : DbAudioParameterValue(id, DbAudioParameter.GenreParameter.Id, name, description);
 
-public class User(int id)
+public class DbUser(int id, int chatId, string username)
 {
     public int Id = id;
+    public int ChatId = chatId;
+    public string Username = username;
 }
 
 public enum VoteValue
