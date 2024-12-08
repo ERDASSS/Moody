@@ -23,33 +23,8 @@ public class DbUsersByPvVv :
     // Dictionary<DbAudioParameter,
     DefaultDictionary<DbAudioParameterValue,
         DefaultDictionary<VoteValue,
-            List<User>>>
+            List<User>>>;
 // >
-{
-}
-
-// public class AudioParametersDict : Dictionary<DbAudioParameter, DbAudioParameterValues>
-// {
-//     // public Dictionary<DbAudioParameter, AudioParameterValues> Parameters { get; } = new();
-// }
-//
-// public class DbAudioParameterValues
-// {
-//     public Dictionary<DbAudioParameterValue, UsersVotes> Values { get; } = new();
-// }
-//
-// public class UsersVotes
-// {
-//     public Dictionary<VoteValue, List<User>> Votes { get; } = new();
-// }
-
-// public class DbAudioParameter
-// {
-//     public int Id { get; }
-//     public string Name { get; }
-//
-//     private static DbAudioParameter Mood { get; } = new DbAudioParameter()
-// }
 
 public class DbAudioParameter(int id, string name)
     // например "настроение" или "жанр"
@@ -69,33 +44,6 @@ public class DbAudioParameter(int id, string name)
             _ => throw new NotImplementedException($"не реализовано получение параметра по id={id}")
         };
 }
-// public class DbMoodParameter : IDbAudioParameter
-// {
-//     public int Id => 1; 
-//     public string Name => "mood";
-//
-//     // public static MoodParameter Instance { get; } = new();
-// }
-//
-// public class GenreParameter : IDbAudioParameter
-// {
-//     public int Id => 2;
-//     public string Name => "genre";
-//
-//     // public static GenreParameter Instance { get; } = new();
-// }
-
-// public interface IDbAudioParameterValue
-// {
-//     public int Id { get; }
-//     public int ParameterId { get; }
-//     public string Name { get; }
-//     public string? Description { get; }
-//
-//     // возвращает параметр, к которому относится значение
-//     // например по значению "веселая" вернет "настроение"
-//     public DbAudioParameter GetParameter();
-// }
 
 public abstract class DbAudioParameterValue(int id, int parameterId, string name, string? description)
     // например "веселая" или "спокойная" для настроения
@@ -154,40 +102,11 @@ public abstract class DbAudioParameterValue(int id, int parameterId, string name
     }
 }
 
-// public class Mood : IDbAudioParameterValue
-// {
-//     public int Id { get; }
-//     public int ParameterId { get; }
-//     public string Name { get; }
-//     public string? Description { get; }
-//
-//     public Mood(int id, string name, string? description)
-//     {
-//         Id = id;
-//         ParameterId = GetParameter().Id;
-//         Name = name;
-//         Description = description;
-//     }
-//
-//     public DbAudioParameter GetParameter() => DbAudioParameter.MoodParameter;
-// }
-
 public class DbMood(int id, string name, string? description)
-    : DbAudioParameterValue(id, DbAudioParameter.MoodParameter.Id, name, description)
-{
-}
+    : DbAudioParameterValue(id, DbAudioParameter.MoodParameter.Id, name, description);
 
 public class DbGenre(int id, string name, string? description)
-    : DbAudioParameterValue(id, DbAudioParameter.GenreParameter.Id, name, description)
-{
-}
-
-// public class Vote(int id, User user, VoteValue voteValue)
-// {
-//     public int Id { get; } = id;
-//     public User User { get; } = user;
-//     public VoteValue VoteValue { get; } = voteValue;
-// }
+    : DbAudioParameterValue(id, DbAudioParameter.GenreParameter.Id, name, description);
 
 public class User(int id)
 {

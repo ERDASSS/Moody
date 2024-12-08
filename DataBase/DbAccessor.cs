@@ -189,23 +189,13 @@ public class DbAccessor
             var paramId = reader.GetInt32(reader.GetOrdinal("param_id"));
             var paramName = reader.GetString(reader.GetOrdinal("param_name"));
             var param = new DbAudioParameter(paramId, paramName);
-            // if (!votes.TryGetValue(param, out var values))
-            // {
-            //     values = new Dictionary<>();
-            //     votes.Parameters[param] = values;
-            // }
 
             // его значение (и сохраняем параметер/значение)
             var paramValueId = reader.GetInt32(reader.GetOrdinal("value_id"));
             var paramValueName = reader.GetString(reader.GetOrdinal("value_name"));
             var paramValueDescription = reader.GetString(reader.GetOrdinal("description"));
-            // todo: выпилить описание, я передумал (или по крайней мере перенести его в отдельную таблицу)
+            // todo: выпилить описание (или по крайней мере перенести его в отдельную таблицу)
             var paramValue = DbAudioParameterValue.Create(paramValueId, paramId, paramValueName, paramValueDescription);
-            // if (!values.Values.TryGetValue(paramValue, out var votes))
-            // {
-            //     votes = new UsersVotes();
-            //     values.Values[paramValue] = votes;
-            // }
 
             // пользователя, проголосовавшего за это значение
             var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
@@ -217,11 +207,6 @@ public class DbAccessor
             if (!Enum.IsDefined(typeof(VoteValue), intVoteValue))
                 throw new Exception($"у голоса с id: {voteId} неизвестное значение: {intVoteValue}");
             var voteValue = (VoteValue)intVoteValue;
-            // if (!votes.Votes.TryGetValue(voteValue, out var users))
-            // {
-            //     users = new List<User>();
-            //     votes.Votes[voteValue] = users;
-            // }
 
             // и наконец сохраняем значение/тип голоса/пользователи
 
@@ -239,19 +224,13 @@ public class DbAccessor
     }
 }
 
-public class Filter
+public class Filter(
+    HashSet<DbMood>? targetMoods = null,
+    HashSet<DbGenre>? targetGenres = null
+)
 {
-    public HashSet<DbAudioParameterValue>? targetMoods { get; }
-    public HashSet<DbAudioParameterValue>? targetGenres { get; }
-
-    public Filter(
-        HashSet<DbAudioParameterValue>? targetMoods = null,
-        HashSet<DbAudioParameterValue>? targetGenres = null
-    )
-    {
-        this.targetMoods = targetMoods;
-        this.targetGenres = targetGenres;
-    }
+    public HashSet<DbMood>? targetMoods { get; } = targetMoods;
+    public HashSet<DbGenre>? targetGenres { get; } = targetGenres;
 
     public bool Check(DbAudio dbAudio)
     {

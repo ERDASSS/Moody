@@ -6,7 +6,6 @@ public class DefaultDictionary<TKey, TValue> : Dictionary<TKey, TValue>
     where TKey : notnull
     where TValue : new()
 {
-    // private readonly Dictionary<TKey, TValue> dictionary = new();
     public new TValue this[TKey key]
     {
         get

@@ -29,13 +29,7 @@ public class VkUser
     public void AddMood(DbMood mood) => SelectedMoods.Add(mood);
     public void AddGenre(DbGenre genre) => SelectedGenres.Add(genre);
 
-    private Filter MakeFilter()
-    {
-        var targetMoods = SelectedMoods.Select(m => (DbAudioParameterValue)m).ToHashSet();
-        var targetGenres = SelectedGenres.Select(g => (DbAudioParameterValue)g).ToHashSet();
-
-        return new Filter(targetMoods, targetGenres);
-    }
+    private Filter MakeFilter() => new Filter(SelectedMoods, SelectedGenres);
 
     public DbAudioParameterValue ParseParameter(string input)
     {
