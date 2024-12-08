@@ -7,6 +7,28 @@ namespace TGBot;
 
 static class ParametersExtension
 {
+    // что-то мне все меньше нравится этот класс, но как это сделать получше - не знаю
+    public static InlineKeyboardMarkup ToInlineKeyboardMarkup<TParameterValue>(
+        this Dictionary<string, TParameterValue> parameterValues)
+        where TParameterValue : DbAudioParameterValue
+    {
+        var parameter = parameterValues.Values.First().GetParameter();
+        string parameterSuffix;
+        if (parameter == DbAudioParameter.MoodParameter)
+            parameterSuffix = "Mood";
+        else if (parameter == DbAudioParameter.GenreParameter)
+            parameterSuffix = "Genre";
+        else
+            throw new ArgumentException($"на месте {parameter} ожидалась коллекция Moods или Genres");
+
+        var rows = parameterValues.Keys
+            .Select(pvName => new[] { InlineKeyboardButton.WithCallbackData(pvName, $"{pvName}{parameterSuffix}") })
+            .Append([InlineKeyboardButton.WithCallbackData("[подтвердить]", $"accept{parameterSuffix}s")]);
+
+        return new InlineKeyboardMarkup(rows);
+    }
+
+
     public static InlineKeyboardMarkup ToInlineKeyboardMarkup(this IEnumerable<DbAudioParameterValue> parameterValues)
     {
         var parameterName = parameterValues switch
@@ -23,6 +45,7 @@ static class ParametersExtension
 
         return new InlineKeyboardMarkup(rows);
     }
+
 
     // public static InlineKeyboardMarkup ToInlineKeyboardMarkup(this IEnumerable<DbMood> moods)
     // {

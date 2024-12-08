@@ -54,7 +54,7 @@ public abstract class DbAudioParameterValue(int id, int parameterId, string name
     public string Name { get; } = name;
     public string? Description { get; } = description;
 
-    public DbAudioParameter GetParameter() => DbAudioParameter.GetById(Id);
+    public DbAudioParameter GetParameter() => DbAudioParameter.GetById(ParameterId);
 
 
     public static DbAudioParameter GetParameter<TParameterValue>()

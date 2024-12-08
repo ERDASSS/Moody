@@ -7,89 +7,87 @@ using VkNet.Model;
 using VkNet.Model.Attachments;
 using VkNet.Utils;
 
-namespace ApiMethods
+namespace ApiMethods;
+
+public class VkApiWrapper
 {
-    public class VkApiWrapper
+    private VkApi vkApi;
+    private const int applicationId = 52614150;
+
+    public VkApiWrapper()
     {
-        private VkApi vkApi;
-        private const int applicationId = 52614150;
+        var services = new ServiceCollection();
+        services.AddAudioBypass();
+        vkApi = new VkApi(services);
+    }
 
-        public VkApiWrapper()
+    public void AuthorizeWith2FA(string login, string password, string code)
+    {
+        vkApi.Authorize(new ApiAuthParams
         {
-            var services = new ServiceCollection();
-            services.AddAudioBypass();
-            vkApi = new VkApi(services);
-        }
+            ApplicationId = applicationId,
+            Login = login,
+            Password = password,
+            TwoFactorAuthorization = new Func<string>(() => code),
+            Settings = Settings.Audio
+        });
+    }
 
-        public void AuthorizeWith2FA(string login, string password, string code)
+    public void AuthorizeWithToken()
+    {
+        vkApi.Authorize(new ApiAuthParams
         {
-            vkApi.Authorize(new ApiAuthParams
-            {
-                ApplicationId = applicationId,
-                Login = login,
-                Password = password,
-                TwoFactorAuthorization = new Func<string>(() => code),
-                Settings = Settings.Audio
-            });
-        }
+            AccessToken = ""
+        });
+    }
 
-        public void AuthorizeWithToken()
+    public void AuthorizeWithout2FA(string login, string password)
+    {
+        vkApi.Authorize(new ApiAuthParams
         {
-            vkApi.Authorize(new ApiAuthParams
-            {
-                AccessToken = ""
-            });
-        }
+            ApplicationId = applicationId,
+            Login = login,
+            Password = password,
+            Settings = Settings.Audio
+        });
+    }
 
-        public void AuthorizeWithout2FA(string login, string password)
-        {
-            vkApi.Authorize(new ApiAuthParams
-            {
-                ApplicationId = applicationId,
-                Login = login,
-                Password = password,
-                Settings = Settings.Audio
-            });
-        }
+    public long GetUserId() => (long)vkApi.UserId;
 
-        public long GetUserId() => (long)vkApi.UserId;
+    public VkCollection<Audio> GetFavouriteTracks()
+        => vkApi.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = GetUserId() });
 
-        public VkCollection<Audio> GetFavoriteTracks()
-            => vkApi.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = GetUserId() });
 
-        
-        public AudioPlaylist CreatePlaylist(string playListName,
-            string description = null, IEnumerable<Audio> songList = null)
-        {
-            var songListInVkFormat = CreateSongListVkFormat(songList);
-            var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName, description, songListInVkFormat);
+    public AudioPlaylist CreatePlaylist(string playListName,
+        string description = null, IEnumerable<Audio> songList = null)
+    {
+        var songListInVkFormat = CreateSongListVkFormat(songList);
+        var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName, description, songListInVkFormat);
 
-            //if (songListInVkFormat != null)
-            //{
-            //    foreach (var song in songListInVkFormat)
-            //        vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, song.Split());
-            //}
+        //if (songListInVkFormat != null)
+        //{
+        //    foreach (var song in songListInVkFormat)
+        //        vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, song.Split());
+        //}
 
-            return playlist;
-        }
+        return playlist;
+    }
 
-        public AudioPlaylist CreateEmptyPlaylist(string playListName)
-        {
-            var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName);
-            return playlist;
-        }
+    public AudioPlaylist CreateEmptyPlaylist(string playListName)
+    {
+        var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName);
+        return playlist;
+    }
 
-        public void AddTrackToPlaylist(Audio track, AudioPlaylist playlist)
-        {
-            var trackInVkFormat = $"{GetUserId()}_{track.Id}".Split();
-            vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, trackInVkFormat);
-        }
+    public void AddTrackToPlaylist(Audio track, AudioPlaylist playlist)
+    {
+        var trackInVkFormat = $"{GetUserId()}_{track.Id}".Split();
+        vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, trackInVkFormat);
+    }
 
-        private IEnumerable<string> CreateSongListVkFormat(IEnumerable<Audio> songCollection)
-        { 
-            foreach (var song in songCollection)
-                yield return $"{GetUserId()}_{song.Id},";
-        }
-
+    private IEnumerable<string> CreateSongListVkFormat(IEnumerable<Audio> songCollection)
+    {
+        foreach (var song in songCollection)
+            yield return $"{GetUserId()}_{song.Id},";
     }
 }

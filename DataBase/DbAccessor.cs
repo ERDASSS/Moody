@@ -85,13 +85,10 @@ public class DbAccessor
 
     public void SaveAudioInDb(Audio vkAudio, SQLiteConnection connection)
     {
-        if (connection.State != System.Data.ConnectionState.Open)
-            throw new InvalidOperationException("Подключение к базе данных должно быть открыто.");
-
         // SQL-запросы
         const string insertAuthorQuery = @"
-        INSERT OR IGNORE INTO authors (name)
-        VALUES (@AuthorName)";
+        INSERT INTO authors (name) VALUES (@AuthorName)
+        ON CONFLICT (name) DO NOTHING";
 
         const string getAuthorIdQuery = @"
         SELECT author_id FROM authors WHERE name = @AuthorName";
@@ -141,9 +138,6 @@ public class DbAccessor
 
     private DbAudio? TryGetAudioFromBd(Audio vkAudio, SQLiteConnection connection)
     {
-        if (connection.State != ConnectionState.Open)
-            throw new InvalidOperationException("Подключение к базе данных должно быть открыто.");
-
         const string query = @"
             SELECT 
                 t.track_id, 
@@ -159,7 +153,7 @@ public class DbAccessor
                 p.name AS param_name
             FROM tracks t
             JOIN authors a ON t.author_id = a.author_id
-            LEFT JOIN votes v ON t.track_id = v.track_id
+            LEFT JOIN votes v ON t.track_id = v.track_id -- считываем голоса, если они есть (чтобы отличать отсутствующие треки от треков без голосов)
             LEFT JOIN parameter_values pv ON v.param_value_id = pv.value_id
             LEFT JOIN parameters p ON pv.param_id = p.param_id
             WHERE t.title = @Title AND a.name = @AuthorName";
@@ -175,7 +169,7 @@ public class DbAccessor
         var title = reader.GetString(reader.GetOrdinal("title"));
         var author = new DbAuthor(
             reader.GetInt32(reader.GetOrdinal("author_id")),
-            reader.GetString(reader.GetOrdinal("name"))
+            reader.GetString(reader.GetOrdinal("author_name"))
         );
         var trackIds = new HashSet<int>(); // ожидается, что тут будет id ровно 1-го трека
 
@@ -185,40 +179,46 @@ public class DbAccessor
         {
             trackIds.Add(trackId);
 
-            // вытаскиваем параметр
-            var paramId = reader.GetInt32(reader.GetOrdinal("param_id"));
-            var paramName = reader.GetString(reader.GetOrdinal("param_name"));
-            var param = new DbAudioParameter(paramId, paramName);
+            // вытаскиваем голос за это значение
+            if (reader.IsDBNull(reader.GetOrdinal("param_id")))
+            {
+                // Никаких голосов за этот трек может и не быть,
+                // тогда все остальные поля (параметры этого голоса) тоже будут NULL 
+                // так что дальше можно не считывать
+                continue;
+            }
 
-            // его значение (и сохраняем параметер/значение)
-            var paramValueId = reader.GetInt32(reader.GetOrdinal("value_id"));
-            var paramValueName = reader.GetString(reader.GetOrdinal("value_name"));
-            var paramValueDescription = reader.GetString(reader.GetOrdinal("description"));
-            // todo: выпилить описание (или по крайней мере перенести его в отдельную таблицу)
-            var paramValue = DbAudioParameterValue.Create(paramValueId, paramId, paramValueName, paramValueDescription);
-
-            // пользователя, проголосовавшего за это значение
-            var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
-            var user = new User(userId);
-
-            // голос за это значение (и сохраняем параметер/значение/тип голоса)
             var voteId = reader.GetInt32(reader.GetOrdinal("vote_id"));
             var intVoteValue = reader.GetInt32(reader.GetOrdinal("vote_value"));
             if (!Enum.IsDefined(typeof(VoteValue), intVoteValue))
                 throw new Exception($"у голоса с id: {voteId} неизвестное значение: {intVoteValue}");
             var voteValue = (VoteValue)intVoteValue;
 
-            // и наконец сохраняем значение/тип голоса/пользователи
 
+            // вытаскиваем параметр
+            var paramId = reader.GetInt32(reader.GetOrdinal("param_id"));
+            var paramName = reader.GetString(reader.GetOrdinal("param_name"));
+            var param = new DbAudioParameter(paramId, paramName);
+
+            // вытаскиваем его значение
+            var paramValueId = reader.GetInt32(reader.GetOrdinal("value_id"));
+            var paramValueName = reader.GetString(reader.GetOrdinal("value_name"));
+            var paramValueDescription = reader.GetString(reader.GetOrdinal("description"));
+            // todo: выпилить описание (или по крайней мере перенести его в отдельную таблицу)
+            var paramValue = DbAudioParameterValue.Create(paramValueId, paramId, paramValueName, paramValueDescription);
+
+            // вытаскиваем пользователя, проголосовавшего за это значение
+            var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
+            var user = new User(userId);
+
+            // и наконец сохраняем значение/тип голоса/пользователи
             votes[paramValue][voteValue].Add(user);
         } while (reader.Read());
 
         if (trackIds.Count != 1)
-        {
             Console.WriteLine($"Предупреждение: в бд найдено более одного трека с названием '{vkAudio.Title}' " +
                               $"и автором '{vkAudio.Artist}' " +
                               $"(использованы параметры обоих)");
-        }
 
         return new DbAudio(trackId, title, author, votes);
     }

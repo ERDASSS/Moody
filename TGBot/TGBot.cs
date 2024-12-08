@@ -89,21 +89,18 @@ public class TGBot
                 if (!users.ContainsKey(chatId))
                     break;
 
+                // todo: чет много дублирования на настроение и жанр
                 if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
                 {
                     var mood = query.Data.Replace("Mood", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
-
-                    // TODO: написать метод по доставанию id из бд
-                    users[chatId].AddMood((DbMood)users[chatId].ParseParameter($"Mood:id:{mood}"));
+                    users[chatId].AddMood(users[chatId].SuggestedMoods[mood]);
                 }
                 else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genre"))
                 {
                     var genre = query.Data.Replace("Genre", "");
                     await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
-
-                    // TODO: написать метод по доставанию id из бд
-                    users[chatId].AddGenre((DbGenre)users[chatId].ParseParameter($"Genre:id:{genre}"));
+                    users[chatId].AddGenre(users[chatId].SuggestedGenres[genre]);
                 }
                 else if (query.Data.StartsWith("accept"))
                 {
@@ -177,7 +174,6 @@ public class TGBot
                 await AuthorizeWithToken(msg.Chat.Id);
                 break;
             }
-
         }
     }
 
@@ -189,9 +185,15 @@ public class TGBot
 
     private async Task SendStartMessage(long chatId)
     {
-        await bot.SendMessage(chatId, "Добро пожаловать! Пожалуйста, залогиньтесь во ВКонтакте. Для этого введите команду /login");
-        await bot.SendMessage(chatId, "Внимание! Бот не собирает ваши личные данные. Производится только только авторизация", replyMarkup: replyKeyboardLogin);
+        await bot.SendMessage(chatId,
+            "Добро пожаловать! Пожалуйста, залогиньтесь во ВКонтакте. Для этого введите команду /login");
+        await bot.SendMessage(chatId,
+            "Внимание! Бот не собирает ваши личные данные. Производится только только авторизация",
+            replyMarkup: replyKeyboardLogin);
     }
+
+    // TODO: выделить авторизацию и выбор треков в 2 разных класса
+    // TODO: потом все другие "сценарии" работы (например разметка треков) тоже в отдельные классы
 
     private async Task AuthorizeWithToken(long chatId)
     {
@@ -206,6 +208,7 @@ public class TGBot
             Console.WriteLine(exception);
             return;
         }
+
         await ConfirmAuthorization(chatId, true);
     }
 
@@ -374,24 +377,33 @@ public class TGBot
 
         if (!user.AreMoodsSelected)
         {
+            users[chatId].SuggestedMoods = dbAccessor.GetMoods().ToDictionary(m => m.Name, m => m);
             await bot.SendMessage(chatId, "Выберите настроение",
-                replyMarkup: dbAccessor.GetMoods().ToInlineKeyboardMarkup());
+                replyMarkup: users[chatId].SuggestedMoods.ToInlineKeyboardMarkup());
             return;
         }
 
         if (!user.AreGenresSelected)
         {
+            users[chatId].SuggestedGenres = dbAccessor.GetGenres().ToDictionary(g => g.Name, g => g);
             await bot.SendMessage(chatId, "Выберите жанры",
-                replyMarkup: dbAccessor.GetGenres().ToInlineKeyboardMarkup());
+                replyMarkup: users[chatId].SuggestedGenres.ToInlineKeyboardMarkup());
             return;
         }
 
-        await bot.SendMessage(chatId, "Пока только ваши треки");
-        // TODO: обработка плейлиста
-        var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
+        // await bot.SendMessage(chatId, "Пока только ваши треки");
+        var favouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
+        var filter = users[chatId].GetFilter();
+        var filteredTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, filter);
+        // var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
         //CreatePlaylist(chatId);
 
-        await bot.SendMessage(chatId, tracks);
+        var message = string.Join('\n', filteredTracks.Select(x => x.Title));
+        if (message == "")
+            message = "у вас не нашлось подходящих размеченных треков(";
+        
+        // TODO: создание плейлиста
+        await bot.SendMessage(chatId, message);
 
         //Console.WriteLine(tracks);
         // var tracksList
@@ -400,8 +412,8 @@ public class TGBot
 
     private async void CreatePlaylist(long chatId)
     {
-        var favouriteTracks = users[chatId].VkApi.GetFavoriteTracks();
-        var choosedTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, users[chatId].Filter);
+        var favouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
+        var choosedTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, users[chatId].GetFilter());
         var playlist = users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "", choosedTracks);
 
 

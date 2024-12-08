@@ -12,9 +12,10 @@ public class VkUser
     }
 
     public VkApiWrapper VkApi { get; private set; }
+    public Dictionary<string, DbMood> SuggestedMoods { get; set; } = new(); // DbMood по DbMood.Name
+    public Dictionary<string, DbGenre> SuggestedGenres { get; set; } = new(); // DbGenre по DbGenre.Name
     public HashSet<DbMood> SelectedMoods { get; } = new();
     public HashSet<DbGenre> SelectedGenres { get; } = new();
-    public Filter Filter => MakeFilter();
     public bool AreMoodsSelected { get; set; }
     public bool AreGenresSelected { get; set; }
 
@@ -29,7 +30,7 @@ public class VkUser
     public void AddMood(DbMood mood) => SelectedMoods.Add(mood);
     public void AddGenre(DbGenre genre) => SelectedGenres.Add(genre);
 
-    private Filter MakeFilter() => new Filter(SelectedMoods, SelectedGenres);
+    public Filter GetFilter() => new Filter(SelectedMoods, SelectedGenres);
 
     public DbAudioParameterValue ParseParameter(string input)
     {
