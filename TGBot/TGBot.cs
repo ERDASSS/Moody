@@ -391,12 +391,12 @@ public class TGBot
             return;
         }
 
-        await bot.SendMessage(chatId, "Пока только ваши треки");
+        //await bot.SendMessage(chatId, "Пока только ваши треки");
         // TODO: обработка плейлиста
-        var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
+        //var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
         //CreatePlaylist(chatId);
 
-        await bot.SendMessage(chatId, tracks);
+        //await bot.SendMessage(chatId, tracks);
 
         //Console.WriteLine(tracks);
         // var tracksList

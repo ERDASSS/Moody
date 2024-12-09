@@ -63,28 +63,28 @@ class Program
         var musicList = api.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = id });
         foreach (var music in musicList)
         {
-            Console.WriteLine(music);
+            Console.WriteLine($"{music.Artist} - {music.Title}");
             Console.WriteLine("введите настроение трека (введи stop для остановки)");
             var moodStr = Console.ReadLine();
             if (moodStr == "stop")
                 break;
             //TO DO метод получения id жанра, настроения
             //var moodId = GetMoodId()
-            //var mood = new Mood(id, moodStr, "");
+            //var mood = new Mood(moodId, moodStr, "");
             Console.WriteLine("введите жанр");
             var genreStr = Console.ReadLine();
             //TO DO метод получения id жанра, настроения
             //var genreId = GetMoodId()
-            //var genre = new Mood(id, genreStr, "");
+            //var genre = new Mood(genreId, genreStr, "");
 
             //dbAccessor.SaveAudioInDb(music, connection, mood, genre);
         }
 
-        
+
         //Console.WriteLine(id);
         ////var song = "318348717_456239095".Split();
         ////api.Audio.CreatePlaylist(318348717, "СЮДАА", "", song);
-        
+
         //var songToPlayList = new StringBuilder();
         //for (int i = 0; i < 3; i++)
         //{
