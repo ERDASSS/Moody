@@ -29,6 +29,7 @@ public class DbAccessor
             if (dbAudio == null)
             {
                 // если трека нет в бд, сохраняем его туда с пустыми параметрами
+                // TODO: **Делать 1 запрос, а не по запросу на каждый трек**
                 SaveAudioInDb(vkAudio);
                 continue;
             }
@@ -141,6 +142,10 @@ public class DbAccessor
                 v.vote_id,
                 v.user_id,
                 v.vote_value,
+                u.user_id,
+                u.chat_id,
+                u.username,
+                pv.value_id,
                 pv.name AS value_name,
                 pv.description,
                 p.param_id,
@@ -148,7 +153,7 @@ public class DbAccessor
             FROM tracks t
             JOIN authors a ON t.author_id = a.author_id
             LEFT JOIN votes v ON t.track_id = v.track_id -- считываем голоса, если они есть (чтобы отличать отсутствующие треки от треков без голосов)
-            LEFT JOIN main.users u ON v.user_id = u.user_id
+            LEFT JOIN users u ON v.user_id = u.user_id
             LEFT JOIN parameter_values pv ON v.param_value_id = pv.value_id
             LEFT JOIN parameters p ON pv.param_id = p.param_id
             WHERE t.title = @Title AND a.name = @AuthorName";
@@ -182,13 +187,11 @@ public class DbAccessor
                 // так что дальше можно не считывать
                 continue;
             }
-
             var voteId = reader.GetInt32(reader.GetOrdinal("vote_id"));
             var intVoteValue = reader.GetInt32(reader.GetOrdinal("vote_value"));
             if (!Enum.IsDefined(typeof(VoteValue), intVoteValue))
                 throw new Exception($"у голоса с id: {voteId} неизвестное значение: {intVoteValue}");
             var voteValue = (VoteValue)intVoteValue;
-
 
             // вытаскиваем параметр
             var paramId = reader.GetInt32(reader.GetOrdinal("param_id"));
@@ -198,8 +201,10 @@ public class DbAccessor
             // вытаскиваем его значение
             var paramValueId = reader.GetInt32(reader.GetOrdinal("value_id"));
             var paramValueName = reader.GetString(reader.GetOrdinal("value_name"));
-            var paramValueDescription = reader.GetString(reader.GetOrdinal("description"));
             // todo: выпилить описание (или по крайней мере перенести его в отдельную таблицу)
+            string? paramValueDescription = null;
+            if (!reader.IsDBNull(reader.GetOrdinal("description")))
+                paramValueDescription = reader.GetString(reader.GetOrdinal("description"));
             var paramValue = DbAudioParameterValue.Create(paramValueId, paramId, paramValueName, paramValueDescription);
 
             // вытаскиваем пользователя, проголосовавшего за это значение

@@ -125,7 +125,8 @@ public class TGBot
                     if (users[chatId].CurrentCommand == "/mark")
                         await StartMarking(chatId);
                 }
-                    break;
+
+                break;
             }
 
             default:
@@ -162,6 +163,7 @@ public class TGBot
             users[msg.Chat.Id].CurrentCommand = command;
             users[msg.Chat.Id].SetUsername(msg.From.Username);
         }
+
         switch (command)
         {
             case "/start":
@@ -409,7 +411,6 @@ public class TGBot
         // var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
         CreatePlaylist(chatId);
 
-        
 
         //Console.WriteLine(tracks);
         // var tracksList
@@ -418,21 +419,35 @@ public class TGBot
 
     private async void CreatePlaylist(long chatId)
     {
-        var favouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
-        var choosedTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, users[chatId].GetFilter());
-        var message = string.Join('\n', choosedTracks.Select(x => x.Title));
-        if (message == "")
-            message = "у вас не нашлось подходящих размеченных треков(";
+        try // чтобы бот не падал, если что-то не так с бд
+        {
+            var favouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
+            var chosenTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, users[chatId].GetFilter()).ToList();
+            if (chosenTracks.Count == 0)
+            {
+                await bot.SendMessage(chatId, "у вас не нашлось подходящих размеченных треков(");
+                return;
+            }
 
-        await bot.SendMessage(chatId, message);
-        var playlist = users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "", choosedTracks);
+            // todo: выравнивать список по колонкам
+            var message = "В плейлист вошли:\n" + string.Join('\n', chosenTracks.Select(x => $"> {x.Title} - {x.Artist}"));
+            await bot.SendMessage(chatId, message);
+            var playlist = users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "", chosenTracks);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            await bot.SendMessage(chatId,
+                "Сформировать плейлист не удалось, из за внутренней ошибки, попробуйте позже");
+        }
     }
 
     private async Task StartMarking(long chatId)
     {
         if (!users[chatId].AreMoodsSelected)
         {
-            await bot.SendMessage(chatId, $"Укажите жанр и настроение для: {users[chatId].CurrentTrack.Artist} - {users[chatId].CurrentTrack.Title}");
+            await bot.SendMessage(chatId, $"Укажите жанр и настроение для: " +
+                                          $"{users[chatId].CurrentTrack.Artist} - {users[chatId].CurrentTrack.Title}");
             users[chatId].SuggestedMoods = dbAccessor.GetMoods().ToDictionary(m => m.Name, m => m);
             await bot.SendMessage(chatId, "Выберите настроение для трека",
                 replyMarkup: users[chatId].SuggestedMoods.ToInlineKeyboardMarkup());
@@ -454,14 +469,14 @@ public class TGBot
             dbAccessor.SaveAudioInDb(users[chatId].CurrentTrack);
             dbAudio = dbAccessor.TryGetAudioFromBd(users[chatId].CurrentTrack);
         }
-        
-        
+
+
         foreach (var mood in users[chatId].SelectedMoods)
             dbAccessor.AddVote(dbAudio.DbAudioId, mood.Id, VoteValue.Confirmation, users[chatId].DbUser.Id);
 
         foreach (var genre in users[chatId].SelectedGenres)
             dbAccessor.AddVote(dbAudio.DbAudioId, genre.Id, VoteValue.Confirmation, users[chatId].DbUser.Id);
-        
+
 
         users[chatId].ResetMoodsAndGenres();
         users[chatId].CurrentTrack = users[chatId].FavouriteTracks.Skip(users[chatId].CurrentSkip).FirstOrDefault();
@@ -471,6 +486,7 @@ public class TGBot
             await bot.SendMessage(chatId, "Разметка окончена", replyMarkup: replyKeyboardPlaylistAndMark);
             return;
         }
+
         users[chatId].FavouriteTracks.Skip(1);
         await StartMarking(chatId);
     }
