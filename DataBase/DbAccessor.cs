@@ -22,18 +22,14 @@ public class DbAccessor
 
     public IEnumerable<Audio> FilterAndSaveNewInDb(VkCollection<Audio> usersFavouriteAudios, Filter filter)
     {
-        // соединение создается на 1 фильтрацию
-        using var connection = new SQLiteConnection(ConnectionString);
-        connection.Open();
-
         // по треку получаем его параметры
         foreach (var vkAudio in usersFavouriteAudios)
         {
-            var dbAudio = TryGetAudioFromBd(vkAudio, connection);
+            var dbAudio = TryGetAudioFromBd(vkAudio);
             if (dbAudio == null)
             {
                 // если трека нет в бд, сохраняем его туда с пустыми параметрами
-                SaveAudioInDb(vkAudio, connection);
+                SaveAudioInDb(vkAudio);
                 continue;
             }
 
@@ -54,16 +50,13 @@ public class DbAccessor
         where TParameterValue : DbAudioParameterValue
     {
         var parameter = DbAudioParameterValue.GetParameter<TParameterValue>();
-        // todo: создать соединение один раз
-        using var connection = new SQLiteConnection(ConnectionString);
-        connection.Open();
-
+       
         const string query = @"
         SELECT pv.value_id, pv.name, pv.description
         FROM parameter_values pv
         WHERE pv.param_id = @ParamId";
 
-        using var command = new SQLiteCommand(query, connection);
+        using var command = new SQLiteCommand(query, _connection);
         command.Parameters.AddWithValue("@ParamId", parameter.Id);
 
         using var reader = command.ExecuteReader();
@@ -84,7 +77,7 @@ public class DbAccessor
         return parameterValues;
     }
 
-    public void SaveAudioInDb(Audio vkAudio, SQLiteConnection connection)
+    public void SaveAudioInDb(Audio vkAudio)
     {
         // SQL-запросы
         const string insertAuthorQuery = @"
@@ -98,11 +91,11 @@ public class DbAccessor
         INSERT INTO tracks (title, author_id)
         VALUES (@Title, @AuthorId)";
 
-        using var transaction = connection.BeginTransaction();
+        using var transaction = _connection.BeginTransaction();
         try
         {
             // 1. Добавляем автора, если его еще нет
-            using (var authorCommand = new SQLiteCommand(insertAuthorQuery, connection, transaction))
+            using (var authorCommand = new SQLiteCommand(insertAuthorQuery, _connection, transaction))
             {
                 authorCommand.Parameters.AddWithValue("@AuthorName", vkAudio.Artist);
                 authorCommand.ExecuteNonQuery();
@@ -110,7 +103,7 @@ public class DbAccessor
 
             // 2. Получаем идентификатор автора
             int authorId;
-            using (var getAuthorIdCommand = new SQLiteCommand(getAuthorIdQuery, connection, transaction))
+            using (var getAuthorIdCommand = new SQLiteCommand(getAuthorIdQuery, _connection, transaction))
             {
                 getAuthorIdCommand.Parameters.AddWithValue("@AuthorName", vkAudio.Artist);
                 var authorIdOrNull = getAuthorIdCommand.ExecuteScalar();
@@ -120,7 +113,7 @@ public class DbAccessor
             }
 
             // 3. Добавляем трек
-            using (var trackCommand = new SQLiteCommand(insertTrackQuery, connection, transaction))
+            using (var trackCommand = new SQLiteCommand(insertTrackQuery, _connection, transaction))
             {
                 trackCommand.Parameters.AddWithValue("@Title", vkAudio.Title);
                 trackCommand.Parameters.AddWithValue("@AuthorId", authorId);
@@ -137,7 +130,7 @@ public class DbAccessor
         }
     }
 
-    private DbAudio? TryGetAudioFromBd(Audio vkAudio, SQLiteConnection connection)
+    public DbAudio? TryGetAudioFromBd(Audio vkAudio)
     {
         const string query = @"
             SELECT 
@@ -159,7 +152,7 @@ public class DbAccessor
             LEFT JOIN parameter_values pv ON v.param_value_id = pv.value_id
             LEFT JOIN parameters p ON pv.param_id = p.param_id
             WHERE t.title = @Title AND a.name = @AuthorName";
-        using var command = new SQLiteCommand(query, connection);
+        using var command = new SQLiteCommand(query, _connection);
         command.Parameters.AddWithValue("@Title", vkAudio.Title);
         command.Parameters.AddWithValue("@AuthorName", vkAudio.Artist);
 
@@ -211,7 +204,7 @@ public class DbAccessor
 
             // вытаскиваем пользователя, проголосовавшего за это значение
             var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
-            var chatId = reader.GetInt32(reader.GetOrdinal("chat_id"));
+            var chatId = (long)reader.GetInt32(reader.GetOrdinal("chat_id"));
             var username = reader.GetString(reader.GetOrdinal("username"));
             var user = new DbUser(userId, chatId, username);
 
@@ -229,7 +222,6 @@ public class DbAccessor
 
 
     public void AddVote(
-        SQLiteConnection connection,
         int audioId,
         int parameterValueId,
         VoteValue voteValue,
@@ -239,7 +231,7 @@ public class DbAccessor
         INSERT INTO votes (user_id, track_id, param_value_id, vote_value) 
         VALUES (@UserId, @TrackId, @ParamValueId, @VoteValue)";
 
-        using var command = new SQLiteCommand(query, connection);
+        using var command = new SQLiteCommand(query, _connection);
 
         command.Parameters.AddWithValue("@UserId", userId);
         command.Parameters.AddWithValue("@TrackId", audioId);
@@ -249,13 +241,13 @@ public class DbAccessor
         command.ExecuteNonQuery();
     }
 
-    public void AddOrUpdateUser(SQLiteConnection connection, int chatId, string username)
+    public void AddOrUpdateUser(long chatId, string username)
     {
         const string insertOrUpdateQuery = @"
         INSERT INTO users (chat_id, username) VALUES (@ChatId, @Username)
         ON CONFLICT(chat_id) DO UPDATE SET username = @Username";
 
-        using var authorCommand = new SQLiteCommand(insertOrUpdateQuery, connection);
+        using var authorCommand = new SQLiteCommand(insertOrUpdateQuery, _connection);
         authorCommand.Parameters.AddWithValue("@ChatId", chatId);
         authorCommand.Parameters.AddWithValue("@Username", username);
         authorCommand.ExecuteNonQuery();
@@ -263,7 +255,7 @@ public class DbAccessor
 
     // todo: сделать меньше дублирования (добавить метод для создания команды и сразу добавления в нее параметров)
 
-    public DbUser? GetUserByChatId(int chatId)
+    public DbUser? GetUserByChatId(long chatId)
     {
         const string query = "SELECT user_id, chat_id, username FROM users WHERE chat_id = @ChatId";
         using var command = new SQLiteCommand(query, _connection);

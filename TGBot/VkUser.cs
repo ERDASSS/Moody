@@ -1,6 +1,8 @@
 ﻿using ApiMethods;
 using Database;
 using Database.db_models;
+using Telegram.Bot.Types;
+using VkNet.Utils;
 
 namespace TGBot;
 
@@ -18,6 +20,12 @@ public class VkUser
     public HashSet<DbGenre> SelectedGenres { get; } = new();
     public bool AreMoodsSelected { get; set; }
     public bool AreGenresSelected { get; set; }
+    public string CurrentCommand { get; set; }
+    public string Username { get; private set; }
+    public DbUser DbUser { get; set; }
+    public VkCollection<VkNet.Model.Attachments.Audio> FavouriteTracks { get; set; }
+    public VkNet.Model.Attachments.Audio CurrentTrack { get; set; }
+    public int CurrentSkip { get; set; }
 
     public void ResetMoodsAndGenres()
     {
@@ -27,28 +35,10 @@ public class VkUser
         AreGenresSelected = false;
     }
 
+    public void SetUsername(string username) => Username = username;
+
     public void AddMood(DbMood mood) => SelectedMoods.Add(mood);
     public void AddGenre(DbGenre genre) => SelectedGenres.Add(genre);
 
     public Filter GetFilter() => new Filter(SelectedMoods, SelectedGenres);
-
-    public DbAudioParameterValue ParseParameter(string input)
-    {
-        var parts = input.Split(':');
-        if (parts.Length < 3)
-            throw new ArgumentException("Неверный формат строки");
-
-
-        var type = parts[0];
-        var id = int.Parse(parts[1]);
-        var name = parts[2];
-        var description = parts.Length > 3 ? parts[3] : null;
-
-        return type switch
-        {
-            "Mood" => new DbMood(id, name, description),
-            "Genre" => new DbGenre(id, name, description),
-            _ => throw new ArgumentException($"Неизвестный тип параметра {type}")
-        };
-    }
 }

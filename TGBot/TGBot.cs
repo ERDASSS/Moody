@@ -12,6 +12,9 @@ using Database;
 using VkNet.Model.Attachments;
 using VkNet.Utils;
 using Database.db_models;
+using VkNet.Model;
+using System.Data.Entity;
+using System.Linq;
 
 namespace TGBot;
 
@@ -61,11 +64,12 @@ public class TGBot
         ResizeKeyboard = false
     };
 
-    private readonly ReplyKeyboardMarkup replyKeyboardPlaylist = new(new List<KeyboardButton[]>
+    private readonly ReplyKeyboardMarkup replyKeyboardPlaylistAndMark = new(new List<KeyboardButton[]>
     {
         new[]
         {
-            new KeyboardButton("/playlist")
+            new KeyboardButton("/playlist"),
+            new KeyboardButton("/mark")
         }
     })
     {
@@ -104,22 +108,24 @@ public class TGBot
                 }
                 else if (query.Data.StartsWith("accept"))
                 {
-                    if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Moods"))
+                    if (query.Data.EndsWith("Moods"))
                     {
                         await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
                         users[chatId].AreMoodsSelected = true;
                     }
-                    else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genres"))
+                    else if (query.Data.EndsWith("Genres"))
                     {
                         await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
                         users[chatId].AreGenresSelected = true;
                     }
-                    else break;
 
-                    await GetPlayList(chatId);
+                    if (users[chatId].CurrentCommand == "/playlist")
+                        await GetPlayList(chatId);
+
+                    if (users[chatId].CurrentCommand == "/mark")
+                        await StartMarking(chatId);
                 }
-
-                break;
+                    break;
             }
 
             default:
@@ -128,7 +134,7 @@ public class TGBot
         }
     }
 
-    private async Task OnMessage(Message msg, UpdateType type)
+    private async Task OnMessage(Telegram.Bot.Types.Message msg, UpdateType type)
     {
         if (msg.Text is not { } text)
             Console.WriteLine($"Отправлено сообщение типа {msg.Type}");
@@ -148,9 +154,14 @@ public class TGBot
             await OnTextMessage(msg);
     }
 
-    private async Task OnCommand(string command, string args, Message msg)
+    private async Task OnCommand(string command, string args, Telegram.Bot.Types.Message msg)
     {
         Console.WriteLine($"Обработка команды {command} {args}");
+        if (users.ContainsKey(msg.Chat.Id))
+        {
+            users[msg.Chat.Id].CurrentCommand = command;
+            users[msg.Chat.Id].SetUsername(msg.From.Username);
+        }
         switch (command)
         {
             case "/start":
@@ -165,19 +176,19 @@ public class TGBot
             }
             case "/playlist":
             {
-                Console.WriteLine(msg.Chat.Id);
                 await GetPlayList(msg.Chat.Id);
                 break;
             }
-            case "/test":
+            case "/mark":
             {
-                await AuthorizeWithToken(msg.Chat.Id);
+                await MarkTracks(msg.Chat.Id);
+                //await AuthorizeWithToken(msg.Chat.Id);
                 break;
             }
         }
     }
 
-    private async Task OnTextMessage(Message msg)
+    private async Task OnTextMessage(Telegram.Bot.Types.Message msg)
     {
         if (authorizations.ContainsKey(msg.Chat.Id))
             await ProcessAuthorizations(msg);
@@ -219,7 +230,7 @@ public class TGBot
         await bot.SendMessage(chatId, "Введите логин (номер телефона или почта)", replyMarkup: replyKeyboardLogin);
     }
 
-    private async Task ProcessAuthorizations(Message message)
+    private async Task ProcessAuthorizations(Telegram.Bot.Types.Message message)
     {
         if (!authorizations.TryGetValue(message.Chat.Id, out var authorization) || message.Text is null)
             return;
@@ -245,7 +256,7 @@ public class TGBot
             await bot.SendMessage(message.Chat.Id, "Попытка авторизации");
             var wasAuthorizationSuccessful = await TryAuthorizeWithout2FA(message.Chat.Id);
             if (!wasAuthorizationSuccessful && authorization.IsCorrectData == true)
-                await bot.SendMessage(message.Chat.Id, "Введите код двух факторной авторизации:");
+                await bot.SendMessage(message.Chat.Id, "Введите код двухфакторной авторизации:");
             return;
         }
 
@@ -264,7 +275,7 @@ public class TGBot
         if (wasAuthorizationSuccessful)
         {
             authorizations.Remove(chatId);
-            await bot.SendMessage(chatId, "Авторизация прошла успешно", replyMarkup: replyKeyboardPlaylist);
+            await bot.SendMessage(chatId, "Авторизация прошла успешно", replyMarkup: replyKeyboardPlaylistAndMark);
         }
         else
         {
@@ -350,7 +361,7 @@ public class TGBot
 
                 case "Вы ввели неверный код":
                     await bot.SendMessage(chatId, "Введен неверный код двухфакторной авторизации. Попробуйте еще раз");
-                    await bot.SendMessage(chatId, "Введите код 2FA:");
+                    await bot.SendMessage(chatId, "Введите код двухфакторной авторизации:");
                     break;
             }
 
@@ -392,18 +403,13 @@ public class TGBot
         }
 
         // await bot.SendMessage(chatId, "Пока только ваши треки");
-        var favouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
-        var filter = users[chatId].GetFilter();
-        var filteredTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, filter);
+        //var favouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
+        //var filter = users[chatId].GetFilter();
+        //var filteredTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, filter);
         // var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
-        //CreatePlaylist(chatId);
+        CreatePlaylist(chatId);
 
-        var message = string.Join('\n', filteredTracks.Select(x => x.Title));
-        if (message == "")
-            message = "у вас не нашлось подходящих размеченных треков(";
         
-        // TODO: создание плейлиста
-        await bot.SendMessage(chatId, message);
 
         //Console.WriteLine(tracks);
         // var tracksList
@@ -414,22 +420,75 @@ public class TGBot
     {
         var favouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
         var choosedTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, users[chatId].GetFilter());
+        var message = string.Join('\n', choosedTracks.Select(x => x.Title));
+        if (message == "")
+            message = "у вас не нашлось подходящих размеченных треков(";
+
+        await bot.SendMessage(chatId, message);
         var playlist = users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "", choosedTracks);
+    }
 
+    private async Task StartMarking(long chatId)
+    {
+        if (!users[chatId].AreMoodsSelected)
+        {
+            await bot.SendMessage(chatId, $"Укажите жанр и настроение для: {users[chatId].CurrentTrack.Artist} - {users[chatId].CurrentTrack.Title}");
+            users[chatId].SuggestedMoods = dbAccessor.GetMoods().ToDictionary(m => m.Name, m => m);
+            await bot.SendMessage(chatId, "Выберите настроение для трека",
+                replyMarkup: users[chatId].SuggestedMoods.ToInlineKeyboardMarkup());
+            return;
+        }
 
-        //foreach (var track in tracksList)
-        //{
-        //    if (!DataBase.HasTrackInDataBase(track))
-        //    {
-        //        await bot.SendMessage(chatId, $"{track.Title} - {track.Artist} данный трек не найден в базе данных." +
-        //                                      $" Для продолжения работы необходимо указать настроение и жанр данного трека");
-        //        await bot.SendMessage(chatId, "Выберите настроение", replyMarkup: dbAccessor.GetMoods().ToInlineKeyboardMarkup());
-        //        await bot.SendMessage(chatId, "Выберите жанр", replyMarkup: dbAccessor.GetGenres().ToInlineKeyboardMarkup());
-        //        //DataBase.AddTrackToDataBase(track, genre, mood);
-        //    }
+        if (!users[chatId].AreGenresSelected)
+        {
+            users[chatId].SuggestedGenres = dbAccessor.GetGenres().ToDictionary(g => g.Name, g => g);
+            await bot.SendMessage(chatId, "Выберите жанр для трека",
+                replyMarkup: users[chatId].SuggestedGenres.ToInlineKeyboardMarkup());
+            return;
+        }
 
-        //    if (DataBase.IsRightTrack(track))
-        //        users[chatId].VkApi.AddTrackToPlaylist(track, playlist);
-        //}
+        var dbAudio = dbAccessor.TryGetAudioFromBd(users[chatId].CurrentTrack);
+
+        if (dbAudio == null)
+        {
+            dbAccessor.SaveAudioInDb(users[chatId].CurrentTrack);
+            dbAudio = dbAccessor.TryGetAudioFromBd(users[chatId].CurrentTrack);
+        }
+        
+        
+        foreach (var mood in users[chatId].SelectedMoods)
+            dbAccessor.AddVote(dbAudio.DbAudioId, mood.Id, VoteValue.Confirmation, users[chatId].DbUser.Id);
+
+        foreach (var genre in users[chatId].SelectedGenres)
+            dbAccessor.AddVote(dbAudio.DbAudioId, genre.Id, VoteValue.Confirmation, users[chatId].DbUser.Id);
+        
+
+        users[chatId].ResetMoodsAndGenres();
+        users[chatId].CurrentTrack = users[chatId].FavouriteTracks.Skip(users[chatId].CurrentSkip).FirstOrDefault();
+        users[chatId].CurrentSkip++;
+        if (users[chatId].CurrentTrack == null || users[chatId].CurrentTrack == default)
+        {
+            await bot.SendMessage(chatId, "Разметка окончена", replyMarkup: replyKeyboardPlaylistAndMark);
+            return;
+        }
+        users[chatId].FavouriteTracks.Skip(1);
+        await StartMarking(chatId);
+    }
+
+    private async Task MarkTracks(long chatId)
+    {
+        if (!users.ContainsKey(chatId))
+        {
+            await StartAuthorization(chatId);
+            return;
+        }
+
+        dbAccessor.AddOrUpdateUser(chatId, users[chatId].Username);
+        users[chatId].DbUser = dbAccessor.GetUserByChatId(chatId);
+        users[chatId].FavouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
+        users[chatId].CurrentTrack = users[chatId].FavouriteTracks.FirstOrDefault();
+        users[chatId].CurrentSkip = 1;
+
+        await StartMarking(chatId);
     }
 }
