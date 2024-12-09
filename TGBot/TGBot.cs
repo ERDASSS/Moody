@@ -408,8 +408,8 @@ public class TGBot
         //var filteredTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, filter);
         // var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
         CreatePlaylist(chatId);
+        await bot.SendMessage(chatId, "Плейлист готов!");
 
-        
 
         //Console.WriteLine(tracks);
         // var tracksList
