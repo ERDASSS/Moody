@@ -11,10 +11,13 @@ public class DbAccessor
 {
     public string DbPath { get; }
     public string ConnectionString => $"Data Source={DbPath};Version=3;";
+    private SQLiteConnection _connection; // todo: заменить все connection на это поле, потом убрать _
 
     public DbAccessor(string dbPath = "moody.db")
     {
         DbPath = dbPath;
+        _connection = new SQLiteConnection(ConnectionString);
+        _connection.Open();
     }
 
     public IEnumerable<Audio> FilterAndSaveNewInDb(VkCollection<Audio> usersFavouriteAudios, Filter filter)
@@ -40,28 +43,17 @@ public class DbAccessor
         }
     }
 
+    public List<DbMood> GetMoods() => GetParameterValues<DbMood>();
+    public List<DbGenre> GetGenres() => GetParameterValues<DbGenre>();
 
-    public List<Mood> GetMoods()
+    /// <summary>
+    /// Получает все существующие значения данного параметра
+    /// (например по параметру "настроение" возвращает все существующие настроения)
+    /// </summary>
+    private List<TParameterValue> GetParameterValues<TParameterValue>()
+        where TParameterValue : DbAudioParameterValue
     {
-        return GetParameterValues(MoodParameter.Instance)
-            .Select(pv => new Mood(pv.Id, pv.Name, pv.Description))
-            .ToList();
-        // TODO: исправить этот ужас
-    }
-
-    public List<Genre> GetGenres()
-    {
-        return GetParameterValues(GenreParameter.Instance)
-            .Select(pv => new Genre(pv.Id, pv.Name, pv.Description))
-            .ToList();
-        // TODO: исправить этот ужас
-    }
-
-    private List<DbAudioParameterValue> GetParameterValues(DbAudioParameter parameter)
-    {
-        // получает все существующие значения данного параметра
-        // (например по параметру "настроение" возвращает все существующие настроения)
-
+        var parameter = DbAudioParameterValue.GetParameter<TParameterValue>();
         // todo: создать соединение один раз
         using var connection = new SQLiteConnection(ConnectionString);
         connection.Open();
@@ -75,8 +67,8 @@ public class DbAccessor
         command.Parameters.AddWithValue("@ParamId", parameter.Id);
 
         using var reader = command.ExecuteReader();
-        var parameterValues = new List<DbAudioParameterValue>();
 
+        var parameterValues = new List<TParameterValue>();
         while (reader.Read())
         {
             var id = reader.GetInt32(reader.GetOrdinal("value_id"));
@@ -85,22 +77,19 @@ public class DbAccessor
                 ? null
                 : reader.GetString(reader.GetOrdinal("description"));
 
-            parameterValues.Add(new DbAudioParameterValue(id, parameter.Id, name, description));
+            parameterValues.Add(DbAudioParameterValue.Create<TParameterValue>(id, parameter.Id, name, description));
+            // yield return DbAudioParameterValue.Create(id, parameter.Id, name, description);
         }
 
         return parameterValues;
     }
 
-
     public void SaveAudioInDb(Audio vkAudio, SQLiteConnection connection)
     {
-        if (connection.State != System.Data.ConnectionState.Open)
-            throw new InvalidOperationException("Подключение к базе данных должно быть открыто.");
-
         // SQL-запросы
         const string insertAuthorQuery = @"
-        INSERT OR IGNORE INTO authors (name)
-        VALUES (@AuthorName)";
+        INSERT INTO authors (name) VALUES (@AuthorName)
+        ON CONFLICT (name) DO NOTHING";
 
         const string getAuthorIdQuery = @"
         SELECT author_id FROM authors WHERE name = @AuthorName";
@@ -150,9 +139,6 @@ public class DbAccessor
 
     private DbAudio? TryGetAudioFromBd(Audio vkAudio, SQLiteConnection connection)
     {
-        if (connection.State != ConnectionState.Open)
-            throw new InvalidOperationException("Подключение к базе данных должно быть открыто.");
-
         const string query = @"
             SELECT 
                 t.track_id, 
@@ -168,12 +154,11 @@ public class DbAccessor
                 p.name AS param_name
             FROM tracks t
             JOIN authors a ON t.author_id = a.author_id
-            LEFT JOIN votes v ON t.track_id = v.track_id
+            LEFT JOIN votes v ON t.track_id = v.track_id -- считываем голоса, если они есть (чтобы отличать отсутствующие треки от треков без голосов)
+            LEFT JOIN main.users u ON v.user_id = u.user_id
             LEFT JOIN parameter_values pv ON v.param_value_id = pv.value_id
             LEFT JOIN parameters p ON pv.param_id = p.param_id
             WHERE t.title = @Title AND a.name = @AuthorName";
-
-
         using var command = new SQLiteCommand(query, connection);
         command.Parameters.AddWithValue("@Title", vkAudio.Title);
         command.Parameters.AddWithValue("@AuthorName", vkAudio.Artist);
@@ -181,78 +166,140 @@ public class DbAccessor
         using var reader = command.ExecuteReader();
         if (!reader.Read())
             return null; // Аудио не найдено
+
         var trackId = reader.GetInt32(reader.GetOrdinal("track_id"));
         var title = reader.GetString(reader.GetOrdinal("title"));
         var author = new DbAuthor(
             reader.GetInt32(reader.GetOrdinal("author_id")),
-            reader.GetString(reader.GetOrdinal("name"))
+            reader.GetString(reader.GetOrdinal("author_name"))
         );
+        var trackIds = new HashSet<int>(); // ожидается, что тут будет id ровно 1-го трека
 
-        var parameters = new AudioParameters();
-        //Собираем параметры
+        // Собираем голоса за параметры
+        var votes = new DbUsersByPvVv();
         do
         {
-            if (reader.IsDBNull(reader.GetOrdinal("param_name"))) continue;
+            trackIds.Add(trackId);
+
+            // вытаскиваем голос за это значение
+            if (reader.IsDBNull(reader.GetOrdinal("param_id")))
+            {
+                // Никаких голосов за этот трек может и не быть,
+                // тогда все остальные поля (параметры этого голоса) тоже будут NULL 
+                // так что дальше можно не считывать
+                continue;
+            }
+
+            var voteId = reader.GetInt32(reader.GetOrdinal("vote_id"));
+            var intVoteValue = reader.GetInt32(reader.GetOrdinal("vote_value"));
+            if (!Enum.IsDefined(typeof(VoteValue), intVoteValue))
+                throw new Exception($"у голоса с id: {voteId} неизвестное значение: {intVoteValue}");
+            var voteValue = (VoteValue)intVoteValue;
+
 
             // вытаскиваем параметр
             var paramId = reader.GetInt32(reader.GetOrdinal("param_id"));
             var paramName = reader.GetString(reader.GetOrdinal("param_name"));
             var param = new DbAudioParameter(paramId, paramName);
-            if (!parameters.Parameters.TryGetValue(param, out var values))
-            {
-                values = new AudioParameterValues();
-                parameters.Parameters[param] = values;
-            }
 
-            // его значение (и сохраняем параметер/значение)
+            // вытаскиваем его значение
             var paramValueId = reader.GetInt32(reader.GetOrdinal("value_id"));
             var paramValueName = reader.GetString(reader.GetOrdinal("value_name"));
             var paramValueDescription = reader.GetString(reader.GetOrdinal("description"));
-            var paramValue = new DbAudioParameterValue(paramValueId, paramId, paramValueName, paramValueDescription);
-            if (!values.Values.TryGetValue(paramValue, out var votes))
-            {
-                votes = new UsersVotes();
-                values.Values[paramValue] = votes;
-            }
+            // todo: выпилить описание (или по крайней мере перенести его в отдельную таблицу)
+            var paramValue = DbAudioParameterValue.Create(paramValueId, paramId, paramValueName, paramValueDescription);
 
-            // пользователя, проголосовавшего за это значение
+            // вытаскиваем пользователя, проголосовавшего за это значение
             var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
-            var user = new User(userId);
+            var chatId = reader.GetInt32(reader.GetOrdinal("chat_id"));
+            var username = reader.GetString(reader.GetOrdinal("username"));
+            var user = new DbUser(userId, chatId, username);
 
-            // голос за это значение (и сохраняем параметер/значение/тип голоса)
-            var voteId = reader.GetInt32(reader.GetOrdinal("vote_id"));
-            var intVoteValue = reader.GetInt32(reader.GetOrdinal("vote_value"));
-            if (!Enum.IsDefined(typeof(VoteValue), 3))
-                throw new Exception($"у голоса с id:{voteId} неизвестное значение: {intVoteValue}");
-            var voteValue = (VoteValue)intVoteValue;
-            if (!votes.Votes.TryGetValue(voteValue, out var users))
-            {
-                users = new List<User>();
-                votes.Votes[voteValue] = users;
-            }
-
-            // и наконец сохраняем параметер/значение/тип голоса/пользователи
-
-            users.Add(user);
+            // и наконец сохраняем значение/тип голоса/пользователи
+            votes[paramValue][voteValue].Add(user);
         } while (reader.Read());
 
-        return new DbAudio(trackId, title, author, parameters);
+        if (trackIds.Count != 1)
+            Console.WriteLine($"Предупреждение: в бд найдено более одного трека с названием '{vkAudio.Title}' " +
+                              $"и автором '{vkAudio.Artist}' " +
+                              $"(использованы параметры обоих)");
+
+        return new DbAudio(trackId, title, author, votes);
+    }
+
+
+    public void AddVote(
+        SQLiteConnection connection,
+        int audioId,
+        int parameterValueId,
+        VoteValue voteValue,
+        int userId)
+    {
+        const string query = @"
+        INSERT INTO votes (user_id, track_id, param_value_id, vote_value) 
+        VALUES (@UserId, @TrackId, @ParamValueId, @VoteValue)";
+
+        using var command = new SQLiteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@UserId", userId);
+        command.Parameters.AddWithValue("@TrackId", audioId);
+        command.Parameters.AddWithValue("@ParamValueId", parameterValueId);
+        command.Parameters.AddWithValue("@VoteValue", (int)voteValue);
+
+        command.ExecuteNonQuery();
+    }
+
+    public void AddOrUpdateUser(SQLiteConnection connection, int chatId, string username)
+    {
+        const string insertOrUpdateQuery = @"
+        INSERT INTO users (chat_id, username) VALUES (@ChatId, @Username)
+        ON CONFLICT(chat_id) DO UPDATE SET username = @Username";
+
+        using var authorCommand = new SQLiteCommand(insertOrUpdateQuery, connection);
+        authorCommand.Parameters.AddWithValue("@ChatId", chatId);
+        authorCommand.Parameters.AddWithValue("@Username", username);
+        authorCommand.ExecuteNonQuery();
+    }
+
+    // todo: сделать меньше дублирования (добавить метод для создания команды и сразу добавления в нее параметров)
+
+    public DbUser? GetUserByChatId(int chatId)
+    {
+        const string query = "SELECT user_id, chat_id, username FROM users WHERE chat_id = @ChatId";
+        using var command = new SQLiteCommand(query, _connection);
+        command.Parameters.AddWithValue("@ChatId", chatId);
+        return GetUserByUsername(command);
+    }
+
+    public DbUser? GetUserByUsername(string username)
+    {
+        using var command = new SQLiteCommand(
+            "SELECT user_id, chat_id, username FROM users WHERE chat_id = @Username",
+            _connection);
+        command.Parameters.AddWithValue("@ChatId", username);
+        return GetUserByUsername(command);
+    }
+
+    private DbUser? GetUserByUsername(SQLiteCommand command)
+    {
+        using var reader = command.ExecuteReader();
+        if (!reader.Read())
+            return null; // User not found
+        return new DbUser(
+            reader.GetInt32(reader.GetOrdinal("user_id")),
+            reader.GetInt32(reader.GetOrdinal("chat_id")),
+            reader.GetString(reader.GetOrdinal("username"))
+        );
     }
 }
 
-public class Filter
+public class Filter(
+    HashSet<DbMood>? targetMoods = null,
+    HashSet<DbGenre>? targetGenres = null
+)
 {
-    public HashSet<DbAudioParameterValue>? targetMoods { get; }
-    public HashSet<DbAudioParameterValue>? targetGenres { get; }
-
-    public Filter(
-        HashSet<DbAudioParameterValue>? targetMoods = null,
-        HashSet<DbAudioParameterValue>? targetGenres = null
-    )
-    {
-        this.targetMoods = targetMoods;
-        this.targetGenres = targetGenres;
-    }
+    public HashSet<DbMood>? targetMoods { get; } = targetMoods;
+    public HashSet<DbGenre>? targetGenres { get; } = targetGenres;
 
     public bool Check(DbAudio dbAudio)
     {
@@ -273,7 +320,7 @@ public class Filter
     {
         // если суммарный балл голосов > 0, то считаем, что аудио относится к данному настроению
         var score = 0.0;
-        var votes = dbAudio.Parameters.Parameters[MoodParameter.Instance].Values[targetMood].Votes;
+        var votes = dbAudio.Votes[targetMood];
         foreach (var voteValue in votes.Keys)
             score += voteValue.Cost() * votes[voteValue].Count;
         return score > 0;
@@ -282,7 +329,7 @@ public class Filter
     private bool CheckGenre(DbAudio dbAudio, DbAudioParameterValue targetGenre, bool considerSubgenres = true)
     {
         var score = 0.0;
-        var votes = dbAudio.Parameters.Parameters[MoodParameter.Instance].Values[targetGenre].Votes;
+        var votes = dbAudio.Votes[targetGenre];
         foreach (var voteValue in votes.Keys)
             score += voteValue.Cost() * votes[voteValue].Count;
         return score > 0;

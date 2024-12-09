@@ -1,19 +1,12 @@
 ﻿namespace Database.db_models;
 
-public class DbAudio
+public class DbAudio(int dbAudioId, string title, DbAuthor author, DbUsersByPvVv votes)
 {
-    public int DbAudioId { get; }
-    public string Title { get; }
-    public DbAuthor Author { get; }
-    public AudioParameters Parameters { get; }
+    public int DbAudioId { get; } = dbAudioId;
+    public string Title { get; } = title;
+    public DbAuthor Author { get; } = author;
 
-    public DbAudio(int dbAudioId, string title, DbAuthor author, AudioParameters parameters)
-    {
-        DbAudioId = dbAudioId;
-        Title = title;
-        Author = author;
-        Parameters = parameters;
-    }
+    public DbUsersByPvVv Votes { get; } = votes;
 }
 
 public class DbAuthor(int id, string name)
@@ -22,29 +15,37 @@ public class DbAuthor(int id, string name)
     public string Name { get; } = name;
 }
 
-public class AudioParameters
-{
-    public Dictionary<DbAudioParameter, AudioParameterValues> Parameters { get; } = new();
-}
+public class DbUsersByPvVv :
+    // в ...[значение_параметра][тип_голоса] лежит список проголосовавших пользователей
+    // т.е. тут хранятся пользователи по ключам Pv (ParameterValue), Vv (VoteValue)
+    // прошу прощения за такой балдежный нейминг c четырьмя согласными подряд,
+    // но DbUsersByParameterValueAndVoteValue было слишком длинно)
+    // Dictionary<DbAudioParameter,
+    DefaultDictionary<DbAudioParameterValue,
+        DefaultDictionary<VoteValue,
+            List<DbUser>>>;
+// >
 
-public class DbAudioParameter // например настроение или жанр
-    (int id, string name)
+public class DbAudioParameter(int id, string name)
+    // например "настроение" или "жанр"
 {
     public int Id { get; } = id;
     public string Name { get; } = name;
+
+    // todo: может получать id из бд, а не хардкодить
+    public static DbAudioParameter MoodParameter { get; } = new DbAudioParameter(1, "mood");
+    public static DbAudioParameter GenreParameter { get; } = new DbAudioParameter(2, "genre");
+
+    public static DbAudioParameter GetById(int id) =>
+        id switch
+        {
+            1 => MoodParameter,
+            2 => GenreParameter,
+            _ => throw new NotImplementedException($"не реализовано получение параметра по id={id}")
+        };
 }
 
-public class MoodParameter() : DbAudioParameter(1, "mood")
-{
-    public static MoodParameter Instance { get; } = new MoodParameter();
-}
-
-public class GenreParameter() : DbAudioParameter(2, "genre")
-{
-    public static GenreParameter Instance { get; } = new GenreParameter();
-}
-
-public class DbAudioParameterValue(int id, int parameterId, string name, string? description)
+public abstract class DbAudioParameterValue(int id, int parameterId, string name, string? description)
     // например "веселая" или "спокойная" для настроения
     // или "рок" для жанра
 {
@@ -53,45 +54,65 @@ public class DbAudioParameterValue(int id, int parameterId, string name, string?
     public string Name { get; } = name;
     public string? Description { get; } = description;
 
-    public virtual DbAudioParameter GetParameter()
+    public DbAudioParameter GetParameter() => DbAudioParameter.GetById(ParameterId);
+
+
+    public static DbAudioParameter GetParameter<TParameterValue>()
+        where TParameterValue : DbAudioParameterValue
     {
-        throw new NotImplementedException();
+        var type = typeof(TParameterValue);
+        if (type == typeof(DbMood))
+            return DbAudioParameter.MoodParameter;
+        if (type == typeof(DbGenre))
+            return DbAudioParameter.GenreParameter;
+        throw new ArgumentException($"не удалось обработать тип: {type}");
+    }
+
+    public static DbAudioParameterValue Create(int id, int parameterId, string name, string? description)
+    {
+        if (parameterId == DbAudioParameter.MoodParameter.Id)
+            return new DbMood(id, name, description);
+        if (parameterId == DbAudioParameter.GenreParameter.Id)
+            return new DbGenre(id, name, description);
+        throw new ArgumentException($"ожидался id параметра, как у " +
+                                    $"mood: {DbAudioParameter.MoodParameter.Id} или" +
+                                    $"genre: {DbAudioParameter.GenreParameter.Id}" +
+                                    $"но получен: {id}");
+    }
+
+    public static TParameterValue Create<TParameterValue>(int id, int parameterId, string name, string? description)
+        where TParameterValue : DbAudioParameterValue
+    {
+        var result = Create(id, parameterId, name, description);
+        if (result is TParameterValue typedResult)
+            return typedResult;
+        throw new InvalidCastException($"Не удалось привести объект типа {result.GetType()} " +
+                                       $"к {typeof(TParameterValue)}.");
+    }
+
+    public override int GetHashCode() => HashCode.Combine(Id, ParameterId, Name, Description);
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not DbAudioParameterValue other) return false;
+        return Id == other.Id &&
+               ParameterId == other.ParameterId &&
+               Name == other.Name &&
+               Description == other.Description;
     }
 }
 
-public class Mood(int id, string name, string? description)
-    : DbAudioParameterValue(id, MoodParameter.Instance.Id, name, description)
-{
-    public override DbAudioParameter GetParameter() => MoodParameter.Instance;
-}
+public class DbMood(int id, string name, string? description)
+    : DbAudioParameterValue(id, DbAudioParameter.MoodParameter.Id, name, description);
 
-public class Genre(int id, string name, string? description)
-    : DbAudioParameterValue(id, GenreParameter.Instance.Id, name, description)
-{
-    public override DbAudioParameter GetParameter() => GenreParameter.Instance;
+public class DbGenre(int id, string name, string? description)
+    : DbAudioParameterValue(id, DbAudioParameter.GenreParameter.Id, name, description);
 
-}
-
-public class AudioParameterValues
-{
-    public Dictionary<DbAudioParameterValue, UsersVotes> Values { get; } = new();
-}
-
-public class UsersVotes()
-{
-    public Dictionary<VoteValue, List<User>> Votes { get; } = new();
-}
-
-// public class Vote(int id, User user, VoteValue voteValue)
-// {
-//     public int Id { get; } = id;
-//     public User User { get; } = user;
-//     public VoteValue VoteValue { get; } = voteValue;
-// }
-
-public class User(int id)
+public class DbUser(int id, int chatId, string username)
 {
     public int Id = id;
+    public int ChatId = chatId;
+    public string Username = username;
 }
 
 public enum VoteValue
