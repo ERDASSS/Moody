@@ -76,6 +76,18 @@ public class TGBot
         ResizeKeyboard = false
     };
 
+    private readonly ReplyKeyboardMarkup replyKeyboardUnmarkedContinue = new(new List<KeyboardButton[]>
+    {
+        new[]
+        {
+            new KeyboardButton("/continue"),
+            new KeyboardButton("/mark_unmarked")
+        }
+    })
+    {
+        ResizeKeyboard = false
+    };
+
     private async Task OnError(Exception exception, HandleErrorSource source)
     {
         Console.WriteLine(exception);
@@ -122,7 +134,7 @@ public class TGBot
                     if (users[chatId].CurrentCommand == "/playlist")
                         await GetPlayList(chatId);
 
-                    if (users[chatId].CurrentCommand == "/mark")
+                    if (users[chatId].CurrentCommand == "/mark" || users[chatId].CurrentCommand == "/mark_unmarked")
                         await StartMarking(chatId);
                 }
 
@@ -158,6 +170,7 @@ public class TGBot
     private async Task OnCommand(string command, string args, Telegram.Bot.Types.Message msg)
     {
         Console.WriteLine($"Обработка команды {command} {args}");
+
         if (users.ContainsKey(msg.Chat.Id))
         {
             users[msg.Chat.Id].CurrentCommand = command;
@@ -184,7 +197,17 @@ public class TGBot
             case "/mark":
             {
                 await MarkTracks(msg.Chat.Id);
-                //await AuthorizeWithToken(msg.Chat.Id);
+                break;
+            }
+            case "/continue":
+            {
+                await ContinueCreatingPlaylist(msg.Chat.Id);
+                break;
+            }
+            case "/mark_unmarked":
+            {
+                users[msg.Chat.Id].IsMarkingUnmarked = true;
+                await MarkTracks(msg.Chat.Id);
                 break;
             }
         }
@@ -410,9 +433,6 @@ public class TGBot
         //var filteredTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, filter);
         // var tracks = string.Join('\n', users[chatId].VkApi.GetFavoriteTracks().Select(x => x.Title));
         CreatePlaylist(chatId);
-        await bot.SendMessage(chatId, "Плейлист готов!");
-
-
         //Console.WriteLine(tracks);
         // var tracksList
         user.ResetMoodsAndGenres();
@@ -424,16 +444,32 @@ public class TGBot
         {
             var favouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
             var chosenTracks = dbAccessor.FilterAndSaveNewInDb(favouriteTracks, users[chatId].GetFilter()).ToList();
+
             if (chosenTracks.Count == 0)
             {
-                await bot.SendMessage(chatId, "у вас не нашлось подходящих размеченных треков(");
+                await bot.SendMessage(chatId, "У вас не нашлось подходящих размеченных треков(");
                 return;
             }
+
+            var nonSelectedTracks = favouriteTracks.Except(chosenTracks).ToList();
+            var unmarkedTracks = await GetUnmarkedTracks(nonSelectedTracks);
 
             // todo: выравнивать список по колонкам
             var message = "В плейлист вошли:\n" + string.Join('\n', chosenTracks.Select(x => $"> {x.Title} - {x.Artist}"));
             await bot.SendMessage(chatId, message);
-            var playlist = users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "", chosenTracks);
+
+            users[chatId].UnmarkedTracks = unmarkedTracks;
+            users[chatId].ChosenTracks = chosenTracks;
+
+            if (unmarkedTracks.Count > 0)
+            {
+                message = $"У вас обнаружено {unmarkedTracks.Count} не размеченных треков." +
+                    $" Вы можете их разметить: /mark_unmarked, или продолжить создание плейлиста: /continue";
+                await bot.SendMessage(chatId, message, replyMarkup: replyKeyboardUnmarkedContinue);
+                return;
+            }
+
+            await ContinueCreatingPlaylist(chatId);
         }
         catch (Exception e)
         {
@@ -443,12 +479,52 @@ public class TGBot
         }
     }
 
+    private async Task<List<VkNet.Model.Attachments.Audio>> GetUnmarkedTracks(List<VkNet.Model.Attachments.Audio> nonSelectedTracks)
+    {
+        var unmarkedTracks = new List<VkNet.Model.Attachments.Audio>();
+
+        foreach (var track in nonSelectedTracks)
+        {
+            var dbTrack = dbAccessor.TryGetAudioFromBd(track);
+            var votes = dbTrack.GetVotesStatistics();
+            var hasVotes = false;
+
+            foreach (var vote in votes)
+            {
+                if (vote.Value.ContainsKey(VoteValue.Confirmation) || vote.Value.ContainsKey(VoteValue.Against))
+                {
+                    hasVotes = true;
+                    break;
+                }
+            }
+            if (!hasVotes)
+                unmarkedTracks.Add(track);
+        }
+
+        return unmarkedTracks;
+    }
+
+    private async Task ContinueCreatingPlaylist(long chatId)
+    {
+        users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "", users[chatId].ChosenTracks);
+        await bot.SendMessage(chatId, "Плейлист готов!", replyMarkup: replyKeyboardPlaylistAndMark);
+    }
+    
+
     private async Task StartMarking(long chatId)
     {
+        var dbAudio = dbAccessor.TryGetAudioFromBd(users[chatId].CurrentTrack);
+
+        if (dbAudio == null)
+        {
+            dbAccessor.SaveAudioInDb(users[chatId].CurrentTrack);
+            dbAudio = dbAccessor.TryGetAudioFromBd(users[chatId].CurrentTrack);
+        }
+
         if (!users[chatId].AreMoodsSelected)
         {
-            await bot.SendMessage(chatId, $"Укажите жанр и настроение для: " +
-                                          $"{users[chatId].CurrentTrack.Artist} - {users[chatId].CurrentTrack.Title}");
+            await ShowTrackInfo(chatId, dbAudio);
+
             users[chatId].SuggestedMoods = dbAccessor.GetMoods().ToDictionary(m => m.Name, m => m);
             await bot.SendMessage(chatId, "Выберите настроение для трека",
                 replyMarkup: users[chatId].SuggestedMoods.ToInlineKeyboardMarkup());
@@ -463,15 +539,6 @@ public class TGBot
             return;
         }
 
-        var dbAudio = dbAccessor.TryGetAudioFromBd(users[chatId].CurrentTrack);
-
-        if (dbAudio == null)
-        {
-            dbAccessor.SaveAudioInDb(users[chatId].CurrentTrack);
-            dbAudio = dbAccessor.TryGetAudioFromBd(users[chatId].CurrentTrack);
-        }
-
-
         foreach (var mood in users[chatId].SelectedMoods)
             dbAccessor.AddVote(dbAudio.DbAudioId, mood.Id, VoteValue.Confirmation, users[chatId].DbUser.Id);
 
@@ -480,16 +547,50 @@ public class TGBot
 
 
         users[chatId].ResetMoodsAndGenres();
-        users[chatId].CurrentTrack = users[chatId].FavouriteTracks.Skip(users[chatId].CurrentSkip).FirstOrDefault();
+        users[chatId].CurrentTrack = users[chatId].UnmarkedTracks.Skip(users[chatId].CurrentSkip).FirstOrDefault();
         users[chatId].CurrentSkip++;
+
         if (users[chatId].CurrentTrack == null || users[chatId].CurrentTrack == default)
         {
             await bot.SendMessage(chatId, "Разметка окончена", replyMarkup: replyKeyboardPlaylistAndMark);
+            users[chatId].IsMarkingUnmarked = false;
             return;
         }
 
-        users[chatId].FavouriteTracks.Skip(1);
+        users[chatId].UnmarkedTracks.Skip(1);
         await StartMarking(chatId);
+    }
+
+    private async Task ShowTrackInfo(long chatId, DbAudio dbAudio)
+    {
+        await bot.SendMessage(chatId, $"Укажите жанр и настроение для: " +
+                                          $"{users[chatId].CurrentTrack.Artist} - {users[chatId].CurrentTrack.Title}");
+        if (dbAudio.Votes != null && !users[chatId].IsMarkingUnmarked)
+        {
+            var votes = dbAudio.GetVotesStatistics();
+            await bot.SendMessage(chatId, "Текущая разметка трека:");
+            await bot.SendMessage(chatId, "Настроения:");
+            await ShowTrackStat(chatId, 1, votes);
+            await bot.SendMessage(chatId, "Жанры:");
+            await ShowTrackStat(chatId, 2, votes);
+        }
+    }
+
+    private async Task ShowTrackStat(long chatId, int parameterId, Dictionary<DbAudioParameterValue, Dictionary<VoteValue, int>> votes)
+    {
+        foreach (var vote in votes.Where(v => v.Key.ParameterId == parameterId))
+        {
+            var confirm = 0;
+            var against = 0;
+
+            if (vote.Value.ContainsKey(VoteValue.Confirmation))
+                confirm = vote.Value[VoteValue.Confirmation];
+
+            if (vote.Value.ContainsKey(VoteValue.Against))
+                against = vote.Value[VoteValue.Against];
+
+            await bot.SendMessage(chatId, $"{vote.Key.Name}: {confirm} - за, {against} - против");
+        }
     }
 
     private async Task MarkTracks(long chatId)
@@ -502,8 +603,9 @@ public class TGBot
 
         dbAccessor.AddOrUpdateUser(chatId, users[chatId].Username);
         users[chatId].DbUser = dbAccessor.GetUserByChatId(chatId);
-        users[chatId].FavouriteTracks = users[chatId].VkApi.GetFavouriteTracks();
-        users[chatId].CurrentTrack = users[chatId].FavouriteTracks.FirstOrDefault();
+        if (!users[chatId].IsMarkingUnmarked)
+            users[chatId].UnmarkedTracks = users[chatId].VkApi.GetFavouriteTracks().ToList();
+        users[chatId].CurrentTrack = users[chatId].UnmarkedTracks.FirstOrDefault();
         users[chatId].CurrentSkip = 1;
 
         await StartMarking(chatId);

@@ -5,8 +5,34 @@ public class DbAudio(int dbAudioId, string title, DbAuthor author, DbUsersByPvVv
     public int DbAudioId { get; } = dbAudioId;
     public string Title { get; } = title;
     public DbAuthor Author { get; } = author;
-
     public DbUsersByPvVv Votes { get; } = votes;
+
+    public Dictionary<DbAudioParameterValue, Dictionary<VoteValue, int>> GetVotesStatistics()
+    {
+        var statistic = new Dictionary<DbAudioParameterValue, Dictionary<VoteValue, int>>();
+
+        foreach (var vote in Votes)
+        {
+            var audioParam = vote.Key;
+            var voteValues = vote.Value;
+
+            if (!statistic.ContainsKey(vote.Key))
+                statistic[audioParam] = new Dictionary<VoteValue, int>();
+
+            foreach (var voteValue in voteValues)
+            {
+                var voteType = voteValue.Key;
+                var userCount = voteValue.Value.Count;
+
+                if (!statistic[audioParam].ContainsKey(voteType))
+                    statistic[audioParam][voteType] = 0;
+
+                statistic[audioParam][voteType] += userCount;
+            }
+        }
+
+        return statistic;
+    }
 }
 
 public class DbAuthor(int id, string name)
