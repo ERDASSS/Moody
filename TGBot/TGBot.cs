@@ -447,7 +447,7 @@ public class TGBot
 
             if (chosenTracks.Count == 0)
             {
-                await bot.SendMessage(chatId, "У вас не нашлось подходящих размеченных треков(");
+                await bot.SendMessage(chatId, "У вас не нашлось подходящих размеченных треков(. Вы можете их разметить с помощью команды /mark");
                 return;
             }
 
@@ -486,18 +486,9 @@ public class TGBot
         foreach (var track in nonSelectedTracks)
         {
             var dbTrack = dbAccessor.TryGetAudioFromBd(track);
-            var votes = dbTrack.GetVotesStatistics();
-            var hasVotes = false;
-
-            foreach (var vote in votes)
-            {
-                if (vote.Value.ContainsKey(VoteValue.Confirmation) || vote.Value.ContainsKey(VoteValue.Against))
-                {
-                    hasVotes = true;
-                    break;
-                }
-            }
-            if (!hasVotes)
+            var votes = dbTrack.Votes;
+           
+            if (votes.Count == 0)
                 unmarkedTracks.Add(track);
         }
 
@@ -552,7 +543,7 @@ public class TGBot
 
         if (users[chatId].CurrentTrack == null || users[chatId].CurrentTrack == default)
         {
-            await bot.SendMessage(chatId, "Разметка окончена", replyMarkup: replyKeyboardPlaylistAndMark);
+            await bot.SendMessage(chatId, "Разметка окончена. Вы можете создать плейлист с помощью команды /playlist", replyMarkup: replyKeyboardPlaylistAndMark);
             users[chatId].IsMarkingUnmarked = false;
             return;
         }
