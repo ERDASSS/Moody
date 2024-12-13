@@ -51,7 +51,7 @@ public class DbAccessor
         where TParameterValue : DbAudioParameterValue
     {
         var parameter = DbAudioParameterValue.GetParameter<TParameterValue>();
-       
+
         const string query = @"
         SELECT pv.value_id, pv.name, pv.description
         FROM parameter_values pv
@@ -301,16 +301,12 @@ public class Filter(
     public bool Check(DbAudio dbAudio)
     {
         if (targetMoods != null)
-            foreach (var targetMood in targetMoods)
-                if (!CheckMood(dbAudio, targetMood))
-                    return false;
-
+            if (targetMoods.Any(targetMood => CheckMood(dbAudio, targetMood)))
+                return true;
         if (targetGenres != null)
-            foreach (var targetGenre in targetGenres)
-                if (!CheckGenre(dbAudio, targetGenre))
-                    return false;
-
-        return true;
+            if (targetGenres.Any(targetGenre => CheckGenre(dbAudio, targetGenre)))
+                return true;
+        return false;
     }
 
     private bool CheckMood(DbAudio dbAudio, DbAudioParameterValue targetMood)
