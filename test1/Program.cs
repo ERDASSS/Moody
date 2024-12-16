@@ -9,10 +9,13 @@ using VkNet.Model;
 using Database;
 using Database.db_models;
 using System.Data.SQLite;
+using NUnit.Framework;
 
+[TestFixture]
 class Program
 {
-    static void Main(string[] args)
+    [Test] // переоформлено в тест, чтобы можно было иметь несколько точек входа
+    public void Main(string[] args)
     {
         var services = new ServiceCollection();
         services.AddAudioBypass();

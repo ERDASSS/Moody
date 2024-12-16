@@ -11,4 +11,10 @@
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="test_tracks.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

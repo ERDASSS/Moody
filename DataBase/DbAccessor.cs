@@ -23,6 +23,8 @@ public class DbAccessor
     public IEnumerable<Audio> FilterAndSaveNewInDb(VkCollection<Audio> usersFavouriteAudios, Filter filter)
     {
         // по треку получаем его параметры
+        // TODO: 600-700 запросов работают крайне медленно
+        // TODO: нет, КРАЙНЕ медленно
         foreach (var vkAudio in usersFavouriteAudios)
         {
             var dbAudio = TryGetAudioFromBd(vkAudio);

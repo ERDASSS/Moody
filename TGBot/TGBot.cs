@@ -231,22 +231,22 @@ public class TGBot
     // TODO: выделить авторизацию и выбор треков в 2 разных класса
     // TODO: потом все другие "сценарии" работы (например разметка треков) тоже в отдельные классы
 
-    private async Task AuthorizeWithToken(long chatId)
-    {
-        authorizations[chatId] = new Authorization();
-        await bot.SendMessage(chatId, "Тестовый режим входа по токену");
-        try
-        {
-            users[chatId].VkApi.AuthorizeWithToken();
-        }
-        catch (VkAuthException exception)
-        {
-            Console.WriteLine(exception);
-            return;
-        }
-
-        await ConfirmAuthorization(chatId, true);
-    }
+    // private async Task AuthorizeWithToken(long chatId)
+    // {
+    //     authorizations[chatId] = new Authorization();
+    //     await bot.SendMessage(chatId, "Тестовый режим входа по токену");
+    //     try
+    //     {
+    //         users[chatId].VkApi.AuthorizeWithToken();
+    //     }
+    //     catch (VkAuthException exception)
+    //     {
+    //         Console.WriteLine(exception);
+    //         return;
+    //     }
+    //
+    //     await ConfirmAuthorization(chatId, true);
+    // }
 
     private async Task StartAuthorization(long chatId)
     {
@@ -317,7 +317,12 @@ public class TGBot
             || authorization.Password is null)
             return false;
 
-        var vkApi = new VkApiWrapper();
+        IVkApiWrapper vkApi;
+        // todo: добавить отдельный тестовый режим через команду
+        if (authorization.Login == "800000000" && authorization.Password == "сизам откройся")
+            vkApi = new TestApiWrapper();
+        else
+            vkApi = new VkApiWrapper();
         try
         {
             vkApi.AuthorizeWithout2FA(authorization.Login, authorization.Password);
@@ -447,7 +452,8 @@ public class TGBot
 
             if (chosenTracks.Count == 0)
             {
-                await bot.SendMessage(chatId, "У вас не нашлось подходящих размеченных треков(. Вы можете их разметить с помощью команды /mark");
+                await bot.SendMessage(chatId,
+                    "У вас не нашлось подходящих размеченных треков(. Вы можете их разметить с помощью команды /mark");
                 return;
             }
 
@@ -455,7 +461,8 @@ public class TGBot
             var unmarkedTracks = await GetUnmarkedTracks(nonSelectedTracks);
 
             // todo: выравнивать список по колонкам
-            var message = "В плейлист вошли:\n" + string.Join('\n', chosenTracks.Select(x => $"> {x.Title} - {x.Artist}"));
+            var message = "В плейлист вошли:\n" +
+                          string.Join('\n', chosenTracks.Select(x => $"> {x.Title} - {x.Artist}"));
             await bot.SendMessage(chatId, message);
 
             users[chatId].UnmarkedTracks = unmarkedTracks;
@@ -464,7 +471,7 @@ public class TGBot
             if (unmarkedTracks.Count > 0)
             {
                 message = $"У вас обнаружено {unmarkedTracks.Count} не размеченных треков." +
-                    $" Вы можете их разметить: /mark_unmarked, или продолжить создание плейлиста: /continue";
+                          $" Вы можете их разметить: /mark_unmarked, или продолжить создание плейлиста: /continue";
                 await bot.SendMessage(chatId, message, replyMarkup: replyKeyboardUnmarkedContinue);
                 return;
             }
@@ -479,7 +486,8 @@ public class TGBot
         }
     }
 
-    private async Task<List<VkNet.Model.Attachments.Audio>> GetUnmarkedTracks(List<VkNet.Model.Attachments.Audio> nonSelectedTracks)
+    private async Task<List<VkNet.Model.Attachments.Audio>> GetUnmarkedTracks(
+        List<VkNet.Model.Attachments.Audio> nonSelectedTracks)
     {
         var unmarkedTracks = new List<VkNet.Model.Attachments.Audio>();
 
@@ -487,7 +495,7 @@ public class TGBot
         {
             var dbTrack = dbAccessor.TryGetAudioFromBd(track);
             var votes = dbTrack.Votes;
-           
+
             if (votes.Count == 0)
                 unmarkedTracks.Add(track);
         }
@@ -497,10 +505,10 @@ public class TGBot
 
     private async Task ContinueCreatingPlaylist(long chatId)
     {
-        users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", "", users[chatId].ChosenTracks);
+        users[chatId].VkApi.CreatePlaylist("Избранные треки created by Moody", users[chatId].ChosenTracks, "");
         await bot.SendMessage(chatId, "Плейлист готов!", replyMarkup: replyKeyboardPlaylistAndMark);
     }
-    
+
 
     private async Task StartMarking(long chatId)
     {
@@ -543,7 +551,8 @@ public class TGBot
 
         if (users[chatId].CurrentTrack == null || users[chatId].CurrentTrack == default)
         {
-            await bot.SendMessage(chatId, "Разметка окончена. Вы можете создать плейлист с помощью команды /playlist", replyMarkup: replyKeyboardPlaylistAndMark);
+            await bot.SendMessage(chatId, "Разметка окончена. Вы можете создать плейлист с помощью команды /playlist",
+                replyMarkup: replyKeyboardPlaylistAndMark);
             users[chatId].IsMarkingUnmarked = false;
             return;
         }
@@ -555,7 +564,7 @@ public class TGBot
     private async Task ShowTrackInfo(long chatId, DbAudio dbAudio)
     {
         await bot.SendMessage(chatId, $"Укажите жанр и настроение для: " +
-                                          $"{users[chatId].CurrentTrack.Artist} - {users[chatId].CurrentTrack.Title}");
+                                      $"{users[chatId].CurrentTrack.Artist} - {users[chatId].CurrentTrack.Title}");
         if (dbAudio.Votes != null && !users[chatId].IsMarkingUnmarked)
         {
             var votes = dbAudio.GetVotesStatistics();
@@ -567,7 +576,8 @@ public class TGBot
         }
     }
 
-    private async Task ShowTrackStat(long chatId, int parameterId, Dictionary<DbAudioParameterValue, Dictionary<VoteValue, int>> votes)
+    private async Task ShowTrackStat(long chatId, int parameterId,
+        Dictionary<DbAudioParameterValue, Dictionary<VoteValue, int>> votes)
     {
         foreach (var vote in votes.Where(v => v.Key.ParameterId == parameterId))
         {

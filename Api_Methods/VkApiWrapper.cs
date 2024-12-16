@@ -9,7 +9,7 @@ using VkNet.Utils;
 
 namespace ApiMethods;
 
-public class VkApiWrapper
+public class VkApiWrapper : IVkApiWrapper
 {
     private VkApi vkApi;
     private const int applicationId = 52614150;
@@ -52,14 +52,14 @@ public class VkApiWrapper
         });
     }
 
-    public long GetUserId() => (long)vkApi.UserId;
+    private long GetUserId() => (long)vkApi.UserId;
 
     public VkCollection<Audio> GetFavouriteTracks()
         => vkApi.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = GetUserId() });
 
-
     public AudioPlaylist CreatePlaylist(string playListName,
-        string description = null, IEnumerable<Audio> songList = null)
+        IEnumerable<Audio> songList,
+        string? description = null)
     {
         var songListInVkFormat = CreateSongListVkFormat(songList);
         var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName, description, songListInVkFormat);
