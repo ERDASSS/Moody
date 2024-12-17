@@ -23,13 +23,13 @@ public class TGBot
     public TGBot(string token, DbAccessor dbAccessor)
     {
         bot = new TelegramBotClient(token, cancellationToken: cts.Token);
-        me = bot.GetMe().Result;
         // await bot.DeleteWebhook();
         // await bot.DropPendingUpdates();
         bot.OnError += OnError;
         bot.OnMessage += OnMessage;
         bot.OnUpdate += OnUpdate;
         this.dbAccessor = dbAccessor;
+        me = bot.GetMe().Result;
         Console.WriteLine($"{me.FirstName} запущен на @Moody_24_bot!");
     }
 

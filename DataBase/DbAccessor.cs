@@ -7,6 +7,7 @@ using VkNet.Utils;
 
 namespace Database;
 
+// TODO: ФФАК, оказывается юзернейм есть не у всех пользователей вк
 public class DbAccessor
 {
     public string DbPath { get; }
@@ -189,6 +190,7 @@ public class DbAccessor
                 // так что дальше можно не считывать
                 continue;
             }
+
             var voteId = reader.GetInt32(reader.GetOrdinal("vote_id"));
             var intVoteValue = reader.GetInt32(reader.GetOrdinal("vote_value"));
             if (!Enum.IsDefined(typeof(VoteValue), intVoteValue))
