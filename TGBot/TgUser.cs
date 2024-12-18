@@ -1,6 +1,7 @@
 using ApiMethods;
 using Database;
 using Database.db_models;
+using VkNet.Model.Attachments;
 
 namespace TGBot;
 
@@ -14,19 +15,24 @@ public class TgUser(long chatId, string? tgUsername)
     public IVkApiWrapper? ApiWrapper { get; set; } = null;
 
     // настройки плейлиста
-    public Dictionary<string, DbMood> SuggestedMoods { get; } = new(); // DbMood по DbMood.Name
-    public Dictionary<string, DbGenre> SuggestedGenres { get; } = new(); // DbGenre по DbGenre.Name
+    public Dictionary<string, DbMood> SuggestedMoods { get; set; } = new(); // DbMood по DbMood.Name
+    public Dictionary<string, DbGenre> SuggestedGenres { get; set; } = new(); // DbGenre по DbGenre.Name
     public HashSet<DbMood> SelectedMoods { get; } = new();
     public HashSet<DbGenre> SelectedGenres { get; } = new();
+
+    // это чтобы иметь возможность менять тип контейнера с настроениями, не меняя интерфейс
+    public void SelectMood(DbMood mood) => SelectedMoods.Add(mood);
+    public void SelectGenre(DbGenre genre) => SelectedGenres.Add(genre);
 
     // бд
     public DbUser? DbUser { get; set; } = null;
 
-
-    // public VkNet.Model.Attachments.Audio CurrentTrack { get; set; }
-    // public List<VkNet.Model.Attachments.Audio> UnmarkedTracks { get; set; }
-    // public List<VkNet.Model.Attachments.Audio> ChosenTracks { get; set; }
-    // public int CurrentSkip { get; set; }
+    // разметка
+    public bool? IsMarkingUnmarked { get; set; }
+    public Audio? CurrentTrack { get; set; }
+    public List<Audio> UnmarkedTracks { get; set; }
+    public List<Audio> ChosenTracks { get; set; }
+    public int CurrentSkip { get; set; }
 
     public void ResetMoodsAndGenres()
     {

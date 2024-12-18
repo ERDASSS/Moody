@@ -71,20 +71,22 @@ public class StateMachine
         {
             var nextState = update switch
             {
-                { Message: { } message } => await currentState.OnMessage(bot, currentUser, message),
-                { CallbackQuery: { } callback } => await currentState.OnCallback(bot, currentUser, callback),
+                { Message: { } message } =>
+                    await currentState.OnMessage(bot, dbAccessor, currentUser, message),
+                { CallbackQuery: { } callback } =>
+                    await currentState.OnCallback(bot, dbAccessor, currentUser, callback),
                 _ => throw new InvalidOperationException($"пришел Update неожиданного типа: {update}")
             };
-
+            if (nextState is null) return;
             // выполняем все лямбда переходы, пока не упремся в состояние, требующее ввода
             while (nextState is LambdaState lambdaState)
-                nextState = await lambdaState.Execute(bot, currentUser);
+                nextState = await lambdaState.Execute(bot, dbAccessor, currentUser);
             if (nextState is not InputHandlingState nextInputHandlingState)
                 throw new InvalidOperationException(
                     $"ожидалось, что состояние может быть либо Lambda либо InputHandling, а оно: {nextState}");
 
             currentState = nextInputHandlingState;
-            await nextInputHandlingState.BeforeAnswer(bot, currentUser);
+            await nextInputHandlingState.BeforeAnswer(bot, dbAccessor, currentUser);
         }
         catch (InputException e)
         {
@@ -106,18 +108,20 @@ public abstract class State
 
 public abstract class InputHandlingState : State
 {
-    public abstract Task BeforeAnswer(TelegramBotClient bot, TgUser user);
+    public abstract Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user);
 
     // по умолчанию никакие входящие сигналы не обрабатываются
-    public virtual Task<State> OnMessage(TelegramBotClient bot, TgUser user, Message message) =>
+    // если вернулся null - значит состояние не нужно менять
+    public virtual Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Message message) =>
         throw new UnexpectedMessageException(message);
 
-    public virtual Task<State> OnCallback(TelegramBotClient bot, TgUser user, CallbackQuery callback) =>
+    public virtual Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+        CallbackQuery callback) =>
         throw new UnexpectedCallbackException(callback);
 }
 
 public abstract class LambdaState : State
 {
     // сразу возвращает State, на который нужно перейти, не ожидая ввода (лямбда переход)
-    public abstract Task<State> Execute(TelegramBotClient bot, TgUser user);
+    public abstract Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user);
 }

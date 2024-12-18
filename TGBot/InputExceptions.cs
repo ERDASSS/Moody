@@ -41,5 +41,18 @@ public class IncorrectMessageException : IncorrectInputException
 public class UnexpectedMessageException(Message message)
     : UnexpectedInputException($"Пришло неожиданное сообщение: {message}");
 
+public class IncorrectCallbackException : IncorrectInputException
+{
+    public IncorrectCallbackException(string receivedCallback)
+        : base($"Пришел некорректный калбек: {receivedCallback}")
+    {
+    }
+
+    public IncorrectCallbackException(string receivedCallback, string acceptableCallbacks)
+        : base($"Ожидались калбеки: {acceptableCallbacks}, а получено {receivedCallback}")
+    {
+    }
+}
+
 public class UnexpectedCallbackException(CallbackQuery callback)
     : UnexpectedInputException($"Пришел неожиданный калбек: {callback}");

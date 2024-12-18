@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using ApiMethods;
+using Database;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using VkNet.AudioBypassService.Exceptions;
@@ -10,13 +11,14 @@ class EnterLoginState : InputHandlingState
 {
     public static EnterLoginState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
     {
         await bot.SendMessage(user.ChatId, "Введите логин (номер телефона или почта)");
         // TODO: кнопка отмены
     }
 
-    public override async Task<State> OnMessage(TelegramBotClient bot, TgUser user, Message message)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+        Message message)
     {
         // todo: сделать проверку более щадящей (например "8 900 000 00 00" не заходит)
         if (!(Regex.IsMatch(message.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$") ||
@@ -36,13 +38,14 @@ class EnterPasswordState : InputHandlingState
 {
     public static EnterPasswordState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
     {
         await bot.SendMessage(user.ChatId, "Введите пароль");
         // TODO: кнопка отмены и кнопка назад
     }
 
-    public override async Task<State> OnMessage(TelegramBotClient bot, TgUser user, Message message)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+        Message message)
     {
         if (message.Text is null)
         {
@@ -92,12 +95,13 @@ class Enter2FACodeState : InputHandlingState
 {
     public static Enter2FACodeState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
     {
         await bot.SendMessage(user.ChatId, "Введите код двухфакторной авторизации:");
     }
 
-    public override async Task<State> OnMessage(TelegramBotClient bot, TgUser user, Message message)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+        Message message)
     {
         if (message.Text is null)
         {
