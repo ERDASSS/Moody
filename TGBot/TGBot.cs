@@ -36,7 +36,7 @@ public class TGBot
     private readonly TelegramBotClient bot;
     private readonly Telegram.Bot.Types.User me;
     private readonly CancellationTokenSource cts = new();
-    private readonly Dictionary<long, Authorization> authorizations = new();
+    private readonly Dictionary<long, OldAuthorization> authorizations = new();
     private readonly Dictionary<long, VkUser> users = new();
     private readonly DbAccessor dbAccessor;
 
@@ -228,9 +228,6 @@ public class TGBot
             replyMarkup: replyKeyboardLogin);
     }
 
-    // TODO: выделить авторизацию и выбор треков в 2 разных класса
-    // TODO: потом все другие "сценарии" работы (например разметка треков) тоже в отдельные классы
-
     // private async Task AuthorizeWithToken(long chatId)
     // {
     //     authorizations[chatId] = new Authorization();
@@ -250,7 +247,7 @@ public class TGBot
 
     private async Task StartAuthorization(long chatId)
     {
-        authorizations[chatId] = new Authorization();
+        authorizations[chatId] = new OldAuthorization();
         authorizations[chatId].SetCorrectData(true);
         await bot.SendMessage(chatId, "Введите логин (номер телефона или почта)", replyMarkup: replyKeyboardLogin);
     }

@@ -6,3 +6,4 @@ Database/gitignore/
 !/TGBot/bin/Debug/net8.0/moody.db
 
 test.sln.DotSettings.user
+test.sln.DotSettings
