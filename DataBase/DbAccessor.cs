@@ -8,6 +8,8 @@ using VkNet.Utils;
 namespace Database;
 
 // TODO: ФФАК, оказывается юзернейм есть не у всех пользователей вк
+
+// todo: добавить голосам временную метку
 public class DbAccessor
 {
     public string DbPath { get; }

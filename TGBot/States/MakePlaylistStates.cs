@@ -5,10 +5,22 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TGBot.States;
 
+// TODO: заменить огромное всплывающее окно "приято" на то, которое вылазит при выборе настроения
 // TODO: много дублирования
+
+class BeginMakingPlaylist : LambdaState // просто алиас для удобного вызова снаружи
+{
+    public static BeginMakingPlaylist Instance { get; } = new();
+
+    public override Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    {
+        return Task.FromResult<State>(SelectMoodsState.Instance);
+    }
+}
+
 class SelectMoodsState : InputHandlingState
 {
-    public SelectMoodsState Instance { get; } = new();
+    public static SelectMoodsState Instance { get; } = new();
 
     public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
     {

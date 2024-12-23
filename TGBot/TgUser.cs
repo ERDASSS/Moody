@@ -28,8 +28,9 @@ public class TgUser(long chatId, string? tgUsername)
     public DbUser? DbUser { get; set; } = null;
 
     // разметка
-    public bool? IsMarkingUnmarked { get; set; }
+    public bool IsMarkingUnmarked { get; set; } = false;
     public Audio? CurrentTrack { get; set; }
+    public DbAudio? CurrentDbTrack { get; set; }
     public List<Audio> UnmarkedTracks { get; set; }
     public List<Audio> ChosenTracks { get; set; }
     public int CurrentSkip { get; set; }

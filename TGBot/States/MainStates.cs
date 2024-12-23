@@ -11,11 +11,11 @@ public class InitState : InputHandlingState
     public static InitState Instance { get; } = new();
 
     public override Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
-        => throw new InvalidOperationException("Никогда должен был быть вызван");
+        => throw new InvalidOperationException("Никогда не должен был быть вызван");
 
     // на любое действие пользователя переходит к приветственному состоянию
     public override Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Message message)
-        => Task.FromResult<State>(GreetingState.Instance);
+        => Task.FromResult<State?>(GreetingState.Instance);
 
     public override Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
         CallbackQuery callback)
@@ -38,7 +38,7 @@ public class GreetingState : LambdaState
 
 class LoginMenuState : InputHandlingState
 {
-    public static GreetingState Instance { get; } = new();
+    public static LoginMenuState Instance { get; } = new();
 
     private readonly ReplyKeyboardMarkup commands =
         new ReplyKeyboardMarkup(true).AddButton("/login").AddButton("/demo");
@@ -84,14 +84,14 @@ class MainMenuState : InputHandlingState
             replyMarkup: commands);
     }
 
-    public override Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Message msg)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Message msg)
     {
         switch (msg.Text)
         {
             case "/playlist":
-                throw new NotImplementedException();
+                return BeginMakingPlaylist.Instance;
             case "/mark":
-                throw new NotImplementedException();
+                return BeginMarkState.Instance;
             default:
                 throw new IncorrectMessageException(msg.Text ?? "[null]", "/playlist, /mark");
             // todo: формировать ожидаемый список автоматически, а не вручную
