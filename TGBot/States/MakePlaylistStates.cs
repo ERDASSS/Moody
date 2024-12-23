@@ -174,7 +174,7 @@ public class MarkOrContinueState : InputHandlingState
                 break;
             case "/mark_unmarked":
                 user.IsMarkingUnmarked = true;
-                return MarkState.Instance;
+                return BeginMarkState.Instance;
             default:
                 throw new IncorrectMessageException(message.Text ?? "[null]", "/continue, /mark_unmarked");
         }
