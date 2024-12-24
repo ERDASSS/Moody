@@ -294,6 +294,7 @@ public class AddVoteState : LambdaState
         if (user.CurrentTrack == null || user.CurrentTrack == default)
         {
             await bot.SendMessage(user.ChatId, "Разметка окончена!");
+            user.CurrentSkip = 1;
             return MainMenuState.Instance;
         }
 

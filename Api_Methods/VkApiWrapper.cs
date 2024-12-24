@@ -10,7 +10,7 @@ using VkNet.Utils;
 
 namespace ApiMethods;
 
-public class VkApiWrapper : IVkApiWrapper
+public class VkApiWrapper : IApiWrapper
 {
     private VkApi vkApi;
     private const int applicationId = 52614150;
@@ -93,32 +93,12 @@ public class VkApiWrapper : IVkApiWrapper
     public IEnumerable<Audio> GetFavouriteTracks()
         => vkApi.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = GetUserId() });
 
-    public AudioPlaylist CreatePlaylist(string playListName,
+    public void CreatePlaylist(string playListName,
         IEnumerable<Audio> songList,
         string? description = null)
     {
         var songListInVkFormat = CreateSongListVkFormat(songList);
         var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName, description, songListInVkFormat);
-
-        //if (songListInVkFormat != null)
-        //{
-        //    foreach (var song in songListInVkFormat)
-        //        vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, song.Split());
-        //}
-
-        return playlist;
-    }
-
-    public AudioPlaylist CreateEmptyPlaylist(string playListName)
-    {
-        var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName);
-        return playlist;
-    }
-
-    public void AddTrackToPlaylist(Audio track, AudioPlaylist playlist)
-    {
-        var trackInVkFormat = $"{GetUserId()}_{track.Id}".Split();
-        vkApi.Audio.AddToPlaylist(GetUserId(), (long)playlist.Id, trackInVkFormat);
     }
 
     private IEnumerable<string> CreateSongListVkFormat(IEnumerable<Audio> songCollection)

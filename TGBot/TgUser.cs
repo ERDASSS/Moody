@@ -12,7 +12,7 @@ public class TgUser(long chatId, string? tgUsername)
 
     // вк и авторизация
     public Authorization Authorization { get; } = new Authorization();
-    public IVkApiWrapper? ApiWrapper { get; set; } = null;
+    public IApiWrapper? ApiWrapper { get; set; } = null;
 
     // настройки плейлиста
     public Dictionary<string, DbMood> SuggestedMoods { get; set; } = new(); // DbMood по DbMood.Name

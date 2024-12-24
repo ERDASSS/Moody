@@ -8,12 +8,12 @@ namespace TGBot;
 
 public class VkUserOld
 {
-    public VkUserOld(IVkApiWrapper vkApi)
+    public VkUserOld(IApiWrapper vkApi)
     {
         VkApi = vkApi;
     }
 
-    public IVkApiWrapper VkApi { get; private set; }
+    public IApiWrapper VkApi { get; private set; }
     public Dictionary<string, DbMood> SuggestedMoods { get; set; } = new(); // DbMood по DbMood.Name
     public Dictionary<string, DbGenre> SuggestedGenres { get; set; } = new(); // DbGenre по DbGenre.Name
     public HashSet<DbMood> SelectedMoods { get; } = new();

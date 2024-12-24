@@ -16,7 +16,7 @@ using VkNet.Model;
 using System.Data.Entity;
 using System.Linq;
 
-namespace TGBot;
+namespace TGBot.Old;
 
 public class TGBotOld
 {
@@ -99,47 +99,47 @@ public class TGBotOld
         switch (update)
         {
             case { CallbackQuery: { } query }:
-            {
-                if (query.Data is null || query.Message is null) break;
-                var chatId = query.Message.Chat.Id;
-                if (!users.ContainsKey(chatId))
+                {
+                    if (query.Data is null || query.Message is null) break;
+                    var chatId = query.Message.Chat.Id;
+                    if (!users.ContainsKey(chatId))
+                        break;
+
+                    // todo: чет много дублирования на настроение и жанр
+                    if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
+                    {
+                        var mood = query.Data.Replace("Mood", "");
+                        await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
+                        users[chatId].AddMood(users[chatId].SuggestedMoods[mood]);
+                    }
+                    else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genre"))
+                    {
+                        var genre = query.Data.Replace("Genre", "");
+                        await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
+                        users[chatId].AddGenre(users[chatId].SuggestedGenres[genre]);
+                    }
+                    else if (query.Data.StartsWith("accept"))
+                    {
+                        if (query.Data.EndsWith("Moods"))
+                        {
+                            await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
+                            users[chatId].AreMoodsSelected = true;
+                        }
+                        else if (query.Data.EndsWith("Genres"))
+                        {
+                            await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
+                            users[chatId].AreGenresSelected = true;
+                        }
+
+                        if (users[chatId].CurrentCommand == "/playlist")
+                            await GetPlayList(chatId);
+
+                        if (users[chatId].CurrentCommand == "/mark" || users[chatId].CurrentCommand == "/mark_unmarked")
+                            await StartMarking(chatId);
+                    }
+
                     break;
-
-                // todo: чет много дублирования на настроение и жанр
-                if (!users[chatId].AreMoodsSelected && query.Data.EndsWith("Mood"))
-                {
-                    var mood = query.Data.Replace("Mood", "");
-                    await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {mood}");
-                    users[chatId].AddMood(users[chatId].SuggestedMoods[mood]);
                 }
-                else if (!users[chatId].AreGenresSelected && query.Data.EndsWith("Genre"))
-                {
-                    var genre = query.Data.Replace("Genre", "");
-                    await bot.AnswerCallbackQuery(query.Id, $"Вы выбрали {genre}");
-                    users[chatId].AddGenre(users[chatId].SuggestedGenres[genre]);
-                }
-                else if (query.Data.StartsWith("accept"))
-                {
-                    if (query.Data.EndsWith("Moods"))
-                    {
-                        await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
-                        users[chatId].AreMoodsSelected = true;
-                    }
-                    else if (query.Data.EndsWith("Genres"))
-                    {
-                        await bot.AnswerCallbackQuery(query.Id, "Принято", showAlert: true);
-                        users[chatId].AreGenresSelected = true;
-                    }
-
-                    if (users[chatId].CurrentCommand == "/playlist")
-                        await GetPlayList(chatId);
-
-                    if (users[chatId].CurrentCommand == "/mark" || users[chatId].CurrentCommand == "/mark_unmarked")
-                        await StartMarking(chatId);
-                }
-
-                break;
-            }
 
             default:
                 Console.WriteLine($"Не обрабатывается тип {update.Type}");
@@ -180,36 +180,36 @@ public class TGBotOld
         switch (command)
         {
             case "/start":
-            {
-                await SendStartMessage(msg.Chat.Id);
-                break;
-            }
+                {
+                    await SendStartMessage(msg.Chat.Id);
+                    break;
+                }
             case "/login":
-            {
-                await StartAuthorization(msg.Chat.Id);
-                break;
-            }
+                {
+                    await StartAuthorization(msg.Chat.Id);
+                    break;
+                }
             case "/playlist":
-            {
-                await GetPlayList(msg.Chat.Id);
-                break;
-            }
+                {
+                    await GetPlayList(msg.Chat.Id);
+                    break;
+                }
             case "/mark":
-            {
-                await MarkTracks(msg.Chat.Id);
-                break;
-            }
+                {
+                    await MarkTracks(msg.Chat.Id);
+                    break;
+                }
             case "/continue":
-            {
-                await ContinueCreatingPlaylist(msg.Chat.Id);
-                break;
-            }
+                {
+                    await ContinueCreatingPlaylist(msg.Chat.Id);
+                    break;
+                }
             case "/mark_unmarked":
-            {
-                users[msg.Chat.Id].IsMarkingUnmarked = true;
-                await MarkTracks(msg.Chat.Id);
-                break;
-            }
+                {
+                    users[msg.Chat.Id].IsMarkingUnmarked = true;
+                    await MarkTracks(msg.Chat.Id);
+                    break;
+                }
         }
     }
 
@@ -314,7 +314,7 @@ public class TGBotOld
             || authorization.Password is null)
             return false;
 
-        IVkApiWrapper vkApi;
+        IApiWrapper vkApi;
         // todo: добавить отдельный тестовый режим через команду
         if (authorization.Login == "800000000" && authorization.Password == "сизам откройся")
             vkApi = new TestApiWrapper();

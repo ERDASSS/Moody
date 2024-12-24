@@ -12,7 +12,7 @@ namespace ApiMethods;
 /// <summary>
 /// Тестовая обертка, чтобы не нужно было каждый раз логиниться в боте, подвергая свой акк риску блокировки
 /// </summary>
-public class TestApiWrapper : IVkApiWrapper
+public class TestApiWrapper : IApiWrapper
 {
     private const string TracksPath = "test_tracks.json";
 
@@ -46,11 +46,10 @@ public class TestApiWrapper : IVkApiWrapper
         }
     }
 
-    public AudioPlaylist CreatePlaylist(string playListName, IEnumerable<Audio> songList,
+    public void CreatePlaylist(string playListName, IEnumerable<Audio> songList,
         string? description = null)
     {
         Console.WriteLine("плейлист \"создан\"!");
-        return new AudioPlaylist { Title = playListName, Description = description };
     }
 
     // public AudioPlaylist CreateEmptyPlaylist(string playListName)

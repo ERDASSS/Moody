@@ -4,7 +4,7 @@ using VkNet.Utils;
 
 namespace ApiMethods;
 
-public interface IVkApiWrapper
+public interface IApiWrapper
 {
     public void AuthorizeWithout2FA(string login, string password);
     
@@ -12,7 +12,7 @@ public interface IVkApiWrapper
 
     public IEnumerable<Audio> GetFavouriteTracks();
 
-    public AudioPlaylist CreatePlaylist(
+    public void CreatePlaylist(
         string playListName,
         IEnumerable<Audio> songList,
         string? description = null

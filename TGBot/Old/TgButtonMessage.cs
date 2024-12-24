@@ -1,4 +1,4 @@
-namespace TGBot;
+namespace TGBot.Old;
 
 // TODO: вынести все callback data в этот класс, формировать строки тут
 public class TgButtonMessage
