@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using VkNet;
+using VkNet.AudioBypassService.Exceptions;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
 using VkNet.Model;
@@ -19,6 +20,41 @@ public class VkApiWrapper : IVkApiWrapper
         var services = new ServiceCollection();
         services.AddAudioBypass();
         vkApi = new VkApi(services);
+    }
+
+    public static AuthorizationResult TryAuthorize(
+        out VkApiWrapper apiWrapper,
+        string login,
+        string password,
+        string? code = null)
+    {
+        apiWrapper = new VkApiWrapper();
+        try
+        {
+            if (code is null) apiWrapper.AuthorizeWithout2FA(login, password);
+            else apiWrapper.AuthorizeWith2FA(login, password, code);
+        }
+        catch (VkAuthException exception)
+        {
+            Console.WriteLine(exception);
+            return exception.Message switch
+            {
+                "Неправильный логин или пароль" => AuthorizationResult.WrongLoginOrPassword,
+                "Произведено слишком много попыток входа в этот аккаунт по паролю. " +
+                    "Воспользуйтесь другим способом входа или попробуйте через несколько часов."
+                    => AuthorizationResult.TooManyLoginAttempts,
+                "Вы ввели неверный код" => AuthorizationResult.WrongCode2FA,
+                // _ => AuthorizationResult.UnknownException
+                _ => AuthorizationResult.Need2FA // TODO: возможно 2fa нужно возвращать не тут
+            };
+        }
+        catch (InvalidOperationException exception)
+        {
+            Console.WriteLine(exception);
+            return AuthorizationResult.Need2FA; // TODO: возможно 2fa нужно возвращать не тут
+        }
+
+        return AuthorizationResult.Success;
     }
 
     public void AuthorizeWith2FA(string login, string password, string code)
@@ -90,4 +126,14 @@ public class VkApiWrapper : IVkApiWrapper
         foreach (var song in songCollection)
             yield return $"{GetUserId()}_{song.Id},";
     }
+}
+
+public enum AuthorizationResult
+{
+    Success,
+    WrongLoginOrPassword,
+    WrongCode2FA,
+    TooManyLoginAttempts,
+    UnknownException,
+    Need2FA,
 }
