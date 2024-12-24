@@ -6,9 +6,9 @@ using VkNet.Utils;
 
 namespace TGBot;
 
-public class VkUser
+public class VkUserOld
 {
-    public VkUser(IVkApiWrapper vkApi)
+    public VkUserOld(IVkApiWrapper vkApi)
     {
         VkApi = vkApi;
     }

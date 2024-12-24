@@ -18,9 +18,9 @@ using System.Linq;
 
 namespace TGBot;
 
-public class TGBot
+public class TGBotOld
 {
-    public TGBot(string token, DbAccessor dbAccessor)
+    public TGBotOld(string token, DbAccessor dbAccessor)
     {
         bot = new TelegramBotClient(token, cancellationToken: cts.Token);
         // await bot.DeleteWebhook();
@@ -37,7 +37,7 @@ public class TGBot
     private readonly Telegram.Bot.Types.User me;
     private readonly CancellationTokenSource cts = new();
     private readonly Dictionary<long, OldAuthorization> authorizations = new();
-    private readonly Dictionary<long, VkUser> users = new();
+    private readonly Dictionary<long, VkUserOld> users = new();
     private readonly DbAccessor dbAccessor;
 
     private readonly ReplyKeyboardMarkup replyKeyboardStart = new(

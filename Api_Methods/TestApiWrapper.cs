@@ -25,7 +25,7 @@ public class TestApiWrapper : IVkApiWrapper
     {
     }
 
-    public VkCollection<Audio> GetFavouriteTracks()
+    public IEnumerable<Audio> GetFavouriteTracks()
     {
         var favTracksList = IterateFavouriteTracks().ToList();
         return new VkCollection<Audio>((ulong)favTracksList.Count, favTracksList);

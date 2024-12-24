@@ -23,7 +23,7 @@ public class DbAccessor
         _connection.Open();
     }
 
-    public IEnumerable<Audio> FilterAndSaveNewInDb(VkCollection<Audio> usersFavouriteAudios, Filter filter)
+    public IEnumerable<Audio> FilterAndSaveNewInDb(IEnumerable<Audio> usersFavouriteAudios, Filter filter)
     {
         // по треку получаем его параметры
         // TODO: 600-700 запросов работают крайне медленно

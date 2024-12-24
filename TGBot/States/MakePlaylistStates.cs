@@ -5,7 +5,6 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TGBot.States;
 
-// TODO: заменить огромное всплывающее окно "приято" на то, которое вылазит при выборе настроения
 // TODO: много дублирования
 
 class BeginMakingPlaylist : LambdaState // просто алиас для удобного вызова снаружи
@@ -44,7 +43,7 @@ class SelectMoodsState : InputHandlingState
 
         if (callback.Data.StartsWith("accept") && callback.Data.EndsWith("Moods"))
         {
-            await bot.AnswerCallbackQuery(callback.Id, "Принято", showAlert: true);
+            await bot.AnswerCallbackQuery(callback.Id, "Принято");
             return SelectGenreState.Instance;
         }
 
@@ -78,7 +77,7 @@ class SelectGenreState : InputHandlingState
 
         if (callback.Data.StartsWith("accept") && callback.Data.EndsWith("Genres"))
         {
-            await bot.AnswerCallbackQuery(callback.Id, "Принято", showAlert: true);
+            await bot.AnswerCallbackQuery(callback.Id, "Принято");
             return CreatePlaylistState.Instance;
         }
 
@@ -155,25 +154,16 @@ public class CreatePlaylistState : LambdaState
 
 public class MarkOrContinueState : InputHandlingState
 {
-    private readonly ReplyKeyboardMarkup replyKeyboardUnmarkedContinue = new(new List<KeyboardButton[]>
-    {
-        new[]
-        {
-            new KeyboardButton("/continue"),
-            new KeyboardButton("/mark_unmarked")
-        }
-    })
-    {
-        ResizeKeyboard = false
-    };
-
     public static MarkOrContinueState Instance { get; } = new();
 
     public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
     {
+        var commands = new ReplyKeyboardMarkup(true).AddButton("/mark_unmarked").AddButton("/continue");
+
         var message = $"У вас обнаружено {user.UnmarkedTracks.Count} не размеченных треков." +
                       $" Вы можете их разметить: /mark_unmarked, или продолжить создание плейлиста: /continue";
-        await bot.SendMessage(user.ChatId, message, replyMarkup: replyKeyboardUnmarkedContinue);
+
+        await bot.SendMessage(user.ChatId, message, replyMarkup: commands);
     }
 
     public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
@@ -183,7 +173,6 @@ public class MarkOrContinueState : InputHandlingState
         {
             case "/continue":
                 return FinishCreatingPlaylist.Instance;
-                break;
             case "/mark_unmarked":
                 user.IsMarkingUnmarked = true;
                 return BeginMarkState.Instance;

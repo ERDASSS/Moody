@@ -10,15 +10,11 @@ public interface IVkApiWrapper
     
     public void AuthorizeWith2FA(string login, string password, string code);
 
-    public VkCollection<Audio> GetFavouriteTracks();
+    public IEnumerable<Audio> GetFavouriteTracks();
 
     public AudioPlaylist CreatePlaylist(
         string playListName,
         IEnumerable<Audio> songList,
         string? description = null
     );
-
-    // public AudioPlaylist CreateEmptyPlaylist(string playListName);
-    //
-    // public void AddTrackToPlaylist(Audio track, AudioPlaylist playlist);
 }

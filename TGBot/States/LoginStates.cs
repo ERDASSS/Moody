@@ -3,6 +3,7 @@ using ApiMethods;
 using Database;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 using VkNet.AudioBypassService.Exceptions;
 
 namespace TGBot.States;
@@ -13,13 +14,18 @@ class EnterLoginState : InputHandlingState
 
     public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
     {
-        await bot.SendMessage(user.ChatId, "Введите логин (номер телефона или почта)");
-        // TODO: кнопка отмены
+        var commands = new ReplyKeyboardMarkup(true).AddButton("/back");
+        await bot.SendMessage(user.ChatId, "Введите логин (номер телефона или почта).\n" +
+            "/back  -  назад", 
+            replyMarkup: commands);
     }
 
     public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
         Message message)
     {
+        if (message.Text == "/back")
+            return LoginMenuState.Instance;
+
         // todo: сделать проверку более щадящей (например "8 900 000 00 00" не заходит)
         if (!(Regex.IsMatch(message.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$") ||
               Regex.IsMatch(message.Text, @"^\+?[1-9]\d{8,14}$")))
@@ -40,13 +46,22 @@ class EnterPasswordState : InputHandlingState
 
     public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
     {
-        await bot.SendMessage(user.ChatId, "Введите пароль");
-        // TODO: кнопка отмены и кнопка назад
+        var commands = new ReplyKeyboardMarkup(true).AddButton("/back").AddButton("/exit");
+        await bot.SendMessage(user.ChatId, "Введите пароль.\n" +
+            "/back  -   назад\n" +
+            "/exit  -   в стартовое меню",
+            replyMarkup: commands);
     }
 
     public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
         Message message)
     {
+        if (message.Text == "/back")
+            return EnterLoginState.Instance;
+
+        if (message.Text == "/exit")
+            return LoginMenuState.Instance;
+
         if (message.Text is null)
         {
             await bot.SendMessage(message.Chat.Id,
@@ -90,7 +105,6 @@ class EnterPasswordState : InputHandlingState
     }
 }
 
-// TODO: потестить 2FA, у меня ее нет
 class Enter2FACodeState : InputHandlingState
 {
     public static Enter2FACodeState Instance { get; } = new();

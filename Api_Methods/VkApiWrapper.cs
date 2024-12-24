@@ -90,7 +90,7 @@ public class VkApiWrapper : IVkApiWrapper
 
     private long GetUserId() => (long)vkApi.UserId;
 
-    public VkCollection<Audio> GetFavouriteTracks()
+    public IEnumerable<Audio> GetFavouriteTracks()
         => vkApi.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = GetUserId() });
 
     public AudioPlaylist CreatePlaylist(string playListName,

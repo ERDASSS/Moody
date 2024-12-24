@@ -36,7 +36,7 @@ public class GreetingState : LambdaState
     }
 }
 
-class LoginMenuState : InputHandlingState
+class sdfLoginMenuState : InputHandlingState
 {
     public static LoginMenuState Instance { get; } = new();
 
