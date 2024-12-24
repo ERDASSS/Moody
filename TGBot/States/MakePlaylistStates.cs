@@ -33,13 +33,6 @@ class SelectMoodsState : InputHandlingState
     {
         if (callback.Data is null)
             throw new IncorrectCallbackException("[null]");
-        if (callback.Data.EndsWith("Mood"))
-        {
-            var mood = callback.Data.Replace("Mood", "");
-            await bot.AnswerCallbackQuery(callback.Id, $"Вы выбрали {mood}");
-            user.SelectMood(user.SuggestedMoods[mood]);
-            return null;
-        }
 
         if (callback.Data.StartsWith("accept") && callback.Data.EndsWith("Moods"))
         {
@@ -47,7 +40,12 @@ class SelectMoodsState : InputHandlingState
             return SelectGenreState.Instance;
         }
 
-        throw new IncorrectCallbackException(callback.Data, ".*Mood | acceptMoods");
+        var mood = callback.Data.Replace("Mood", "");
+        await bot.AnswerCallbackQuery(callback.Id, $"Вы выбрали {mood}");
+        user.SelectMood(user.SuggestedMoods[mood]);
+        return null;
+ 
+        //throw new IncorrectCallbackException(callback.Data, ".*Mood | acceptMoods");
     }
 }
 
@@ -67,13 +65,6 @@ class SelectGenreState : InputHandlingState
     {
         if (callback.Data is null)
             throw new IncorrectCallbackException("[null]");
-        if (callback.Data.EndsWith("Genre"))
-        {
-            var genre = callback.Data.Replace("Genre", "");
-            await bot.AnswerCallbackQuery(callback.Id, $"Вы выбрали {genre}");
-            user.SelectGenre(user.SuggestedGenres[genre]);
-            return null;
-        }
 
         if (callback.Data.StartsWith("accept") && callback.Data.EndsWith("Genres"))
         {
@@ -81,7 +72,12 @@ class SelectGenreState : InputHandlingState
             return CreatePlaylistState.Instance;
         }
 
-        throw new IncorrectCallbackException(callback.Data, ".*Genre | acceptGenres");
+        var genre = callback.Data.Replace("Genre", "");
+        await bot.AnswerCallbackQuery(callback.Id, $"Вы выбрали {genre}");
+        user.SelectGenre(user.SuggestedGenres[genre]);
+        return null;
+
+        //throw new IncorrectCallbackException(callback.Data, ".*Genre | acceptGenres");
     }
 }
 
@@ -116,9 +112,8 @@ public class CreatePlaylistState : LambdaState
             user.ChosenTracks = chosenTracks;
 
             if (unmarkedTracks.Count > 0)
-            {
                 return MarkOrContinueState.Instance;
-            }
+            
 
             return FinishCreatingPlaylist.Instance;
         }
@@ -188,7 +183,10 @@ public class FinishCreatingPlaylist : LambdaState
 
     public override async Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
     {
-        user.ApiWrapper!.CreatePlaylist("Избранные треки created by Moody", user.ChosenTracks, "");
+        var description = "Плейлист создан по следующим жанрам и настроениям:\n" +
+            $"Жанры:{user.SelectedGenres.Select(genre => $"{genre.ToString()}; ")}\n" +
+            $"Настроения:{user.SelectedMoods.Select(mood => $"{mood.ToString()}; ")}";
+        user.ApiWrapper!.CreatePlaylist("Избранные треки created by Moody", user.ChosenTracks, description);
         await bot.SendMessage(user.ChatId, "Плейлист готов!");
         user.ResetMoodsAndGenres();
         return new MainMenuState();

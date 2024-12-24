@@ -210,31 +210,22 @@ public class MarkGenreState : InputHandlingState
     public override async Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
         CallbackQuery callback)
     {
-        // todo: чет много дублирования на настроение и жанр
-        if (callback.Data.EndsWith("Genre"))
-        {
-            var genre = callback.Data.Replace("Genre", "");
-            await bot.AnswerCallbackQuery(callback.Id, $"Вы выбрали {genre}");
-            user.SelectGenre(user.SuggestedGenres[genre]);
-            // todo: в качестве хранилища для жанров при разметке используется тот же контейнер,
-            // todo: что и для выбора жанра при формировании плейлиста
-            // todo: хз плохо ли это, но по хорошему это состояние не должно иметь доступ к тому полю
-            // todo: но я хз как это реализовать
-            return null;
-        }
-
         if (callback.Data.StartsWith("accept"))
         {
-            if (callback.Data.EndsWith("Genres"))
-            {
-                await bot.AnswerCallbackQuery(callback.Id, "Принято", showAlert: true);
-                if (user.IsMarkingUnmarked || !user.CurrentDbTrack.Votes.Where(v => v.Key.ParameterId == 1).Any())
-                    return MarkMoodState.Instance;
+            await bot.AnswerCallbackQuery(callback.Id, "Принято");
+            if (user.IsMarkingUnmarked || !user.CurrentDbTrack.Votes.Where(v => v.Key.ParameterId == 1).Any())
+                return MarkMoodState.Instance;
 
-                return MarkAgreementStateMoods.Instance;
-            }
+            return MarkAgreementStateMoods.Instance;
         }
 
+        var genre = callback.Data.Replace("Genre", "");
+        await bot.AnswerCallbackQuery(callback.Id, $"Вы выбрали {genre}");
+        user.SelectGenre(user.SuggestedGenres[genre]);
+        // todo: в качестве хранилища для жанров при разметке используется тот же контейнер,
+        // todo: что и для выбора жанра при формировании плейлиста
+        // todo: хз плохо ли это, но по хорошему это состояние не должно иметь доступ к тому полю
+        // todo: но я хз как это реализовать
         return null;
     }
 }
@@ -253,23 +244,15 @@ public class MarkMoodState : InputHandlingState
     public override async Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
         CallbackQuery callback)
     {
-        // todo: чет много дублирования на настроение и жанр
-        if (callback.Data.EndsWith("Mood"))
-        {
-            var mood = callback.Data.Replace("Mood", "");
-            await bot.AnswerCallbackQuery(callback.Id, $"Вы выбрали {mood}");
-            user.SelectMood(user.SuggestedMoods[mood]);
-            return null;
-        }
-
         if (callback.Data.StartsWith("accept"))
         {
-            if (callback.Data.EndsWith("Moods"))
-            {
-                await bot.AnswerCallbackQuery(callback.Id, "Принято", showAlert: true);
-                return AddVoteState.Instance;
-            }
+            await bot.AnswerCallbackQuery(callback.Id, "Принято");
+            return AddVoteState.Instance;
         }
+        
+        var mood = callback.Data.Replace("Mood", "");
+        await bot.AnswerCallbackQuery(callback.Id, $"Вы выбрали {mood}");
+        user.SelectMood(user.SuggestedMoods[mood]);
 
         return null;
     }
