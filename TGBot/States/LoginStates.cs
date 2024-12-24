@@ -30,7 +30,7 @@ class EnterLoginState : InputHandlingState
         var login = message.Text.Replace(" ", "");
         if (!login.Contains("@"))
             login = login.Replace("-", "").Replace("(", "").Replace(")", ""); ;
-        // todo: сделать проверку более щадящей (например "8 900 000 00 00" не заходит)
+
         if (!(Regex.IsMatch(login, @"^[^@\s]+@[^@\s]+\.[^@\s]+$") ||
               Regex.IsMatch(login, @"^\+?[1-9]\d{8,14}$")))
         {
@@ -85,8 +85,8 @@ class EnterPasswordState : InputHandlingState
                 return MainMenuState.Instance;
 
             case AuthorizationResult.WrongLoginOrPassword:
-                await bot.SendMessage(message.Chat.Id, "Неправильный логин или пароль");
-                return LoginMenuState.Instance;
+                await bot.SendMessage(message.Chat.Id, "Неправильный логин или пароль. Попробуйте еще раз");
+                return EnterLoginState.Instance;
 
             case AuthorizationResult.TooManyLoginAttempts:
                 await bot.SendMessage(message.Chat.Id,
@@ -141,7 +141,7 @@ class Enter2FACodeState : InputHandlingState
 
             case AuthorizationResult.WrongCode2FA:
                 await bot.SendMessage(message.Chat.Id, "Введен неверный код. Попробуйте еще раз");
-                throw new IncorrectMessageException("неверный код");
+                throw new IncorrectMessageException("Неверный код");
 
             case AuthorizationResult.TooManyLoginAttempts:
                 await bot.SendMessage(message.Chat.Id,
@@ -156,7 +156,7 @@ class Enter2FACodeState : InputHandlingState
             case AuthorizationResult.Need2FA:
             case AuthorizationResult.WrongLoginOrPassword:
             default:
-                throw new InvalidOperationException($"неожиданный результат аутентификации: {authResult}");
+                throw new InvalidOperationException($"Неожиданный результат аутентификации: {authResult}");
         }
     }
 }
