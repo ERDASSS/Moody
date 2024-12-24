@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using VkNet.AudioBypassService.Exceptions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TGBot.States;
 
@@ -26,9 +27,12 @@ class EnterLoginState : InputHandlingState
         if (message.Text == "/back")
             return LoginMenuState.Instance;
 
+        var login = message.Text.Replace(" ", "");
+        if (!login.Contains("@"))
+            login = login.Replace("-", "").Replace("(", "").Replace(")", ""); ;
         // todo: сделать проверку более щадящей (например "8 900 000 00 00" не заходит)
-        if (!(Regex.IsMatch(message.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$") ||
-              Regex.IsMatch(message.Text, @"^\+?[1-9]\d{8,14}$")))
+        if (!(Regex.IsMatch(login, @"^[^@\s]+@[^@\s]+\.[^@\s]+$") ||
+              Regex.IsMatch(login, @"^\+?[1-9]\d{8,14}$")))
         {
             await bot.SendMessage(message.Chat.Id,
                 "Неверный формат логина. Пожалуйста, введите корректный логин (почта или номер телефона)");

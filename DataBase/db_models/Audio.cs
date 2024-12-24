@@ -126,6 +126,8 @@ public abstract class DbAudioParameterValue(int id, int parameterId, string name
                Name == other.Name &&
                Description == other.Description;
     }
+
+    public override string ToString() => Name;
 }
 
 public class DbMood(int id, string name, string? description)

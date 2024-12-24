@@ -186,9 +186,11 @@ public class FinishCreatingPlaylist : LambdaState
         var description = "Плейлист создан по следующим жанрам и настроениям:\n" +
             $"Жанры:{user.SelectedGenres.Select(genre => $"{genre.ToString()}; ")}\n" +
             $"Настроения:{user.SelectedMoods.Select(mood => $"{mood.ToString()}; ")}";
+
         user.ApiWrapper!.CreatePlaylist("Избранные треки created by Moody", user.ChosenTracks, description);
         await bot.SendMessage(user.ChatId, "Плейлист готов!");
         user.ResetMoodsAndGenres();
+
         return new MainMenuState();
     }
 }
