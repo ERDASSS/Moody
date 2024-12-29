@@ -184,8 +184,8 @@ public class FinishCreatingPlaylist : LambdaState
     public override async Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
     {
         var description = "Плейлист создан по следующим жанрам и настроениям:\n" +
-            $"Жанры:{user.SelectedGenres.Select(genre => $"{genre.ToString()}; ")}\n" +
-            $"Настроения:{user.SelectedMoods.Select(mood => $"{mood.ToString()}; ")}";
+            $"Жанры:{user.SelectedGenres.Select(genre => $"{genre.Name}; ")}\n" +
+            $"Настроения:{user.SelectedMoods.Select(mood => $"{mood.Name}; ")}";
 
         user.ApiWrapper!.CreatePlaylist("Избранные треки created by Moody", user.ChosenTracks, description);
         await bot.SendMessage(user.ChatId, "Плейлист готов!");

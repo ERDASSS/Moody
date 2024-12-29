@@ -12,14 +12,14 @@ namespace ApiMethods;
 
 public class VkApiWrapper : IApiWrapper
 {
-    private VkApi vkApi;
+    public VkApi VkApi { get; internal set; }
     private const int applicationId = 52614150;
 
     public VkApiWrapper()
     {
         var services = new ServiceCollection();
         services.AddAudioBypass();
-        vkApi = new VkApi(services);
+        VkApi = new VkApi(services);
     }
 
     public static AuthorizationResult TryAuthorize(
@@ -59,7 +59,7 @@ public class VkApiWrapper : IApiWrapper
 
     public void AuthorizeWith2FA(string login, string password, string code)
     {
-        vkApi.Authorize(new ApiAuthParams
+        VkApi.Authorize(new ApiAuthParams
         {
             ApplicationId = applicationId,
             Login = login,
@@ -71,7 +71,7 @@ public class VkApiWrapper : IApiWrapper
 
     public void AuthorizeWithToken()
     {
-        vkApi.Authorize(new ApiAuthParams
+        VkApi.Authorize(new ApiAuthParams
         {
             AccessToken = ""
         });
@@ -79,7 +79,7 @@ public class VkApiWrapper : IApiWrapper
 
     public void AuthorizeWithout2FA(string login, string password)
     {
-        vkApi.Authorize(new ApiAuthParams
+        VkApi.Authorize(new ApiAuthParams
         {
             ApplicationId = applicationId,
             Login = login,
@@ -88,17 +88,17 @@ public class VkApiWrapper : IApiWrapper
         });
     }
 
-    private long GetUserId() => (long)vkApi.UserId;
+    private long GetUserId() => (long)VkApi.UserId;
 
     public IEnumerable<Audio> GetFavouriteTracks()
-        => vkApi.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = GetUserId() });
+        => VkApi.Audio.Get(new VkNet.Model.RequestParams.AudioGetParams { OwnerId = GetUserId() });
 
     public void CreatePlaylist(string playListName,
         IEnumerable<Audio> songList,
         string? description = null)
     {
         var songListInVkFormat = CreateSongListVkFormat(songList);
-        var playlist = vkApi.Audio.CreatePlaylist(GetUserId(), playListName, description, songListInVkFormat);
+        var playlist = VkApi.Audio.CreatePlaylist(GetUserId(), playListName, description, songListInVkFormat);
     }
 
     private IEnumerable<string> CreateSongListVkFormat(IEnumerable<Audio> songCollection)
