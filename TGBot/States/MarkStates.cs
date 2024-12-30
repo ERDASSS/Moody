@@ -15,7 +15,7 @@ public class BeginMarkState : LambdaState
 {
     public static BeginMarkState Instance { get; } = new();
 
-    public override Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override Task<State> Execute(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         dbAccessor.AddOrUpdateUser(user.ChatId, user.TgUsername);
         user.DbUser = dbAccessor.GetUserByChatId(user.ChatId);
@@ -45,7 +45,7 @@ public class ShowMarkupInfoState : LambdaState
 {
     public static ShowMarkupInfoState Instance { get; } = new();
 
-    public override async Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task<State> Execute(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         await ShowTrackInfo(bot, user);
 
@@ -106,7 +106,7 @@ public class MarkAgreementStateGenres : InputHandlingState
 {
     public static MarkAgreementStateGenres Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         var commands = new ReplyKeyboardMarkup(true).AddButton("/yes").AddButton("/no").AddButton("/exit");
 
@@ -118,7 +118,7 @@ public class MarkAgreementStateGenres : InputHandlingState
             replyMarkup: commands);
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Telegram.Bot.Types.Message message)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Telegram.Bot.Types.Message message)
     {
         switch (message.Text)
         {
@@ -153,7 +153,7 @@ public class MarkAgreementStateMoods : InputHandlingState
 {
     public static MarkAgreementStateMoods Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         var commands = new ReplyKeyboardMarkup(true).AddButton("/yes").AddButton("/no").AddButton("/exit");
 
@@ -165,7 +165,7 @@ public class MarkAgreementStateMoods : InputHandlingState
             replyMarkup: commands);
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Telegram.Bot.Types.Message message)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Telegram.Bot.Types.Message message)
     {
         switch (message.Text)
         {
@@ -200,14 +200,14 @@ public class MarkGenreState : InputHandlingState
 {
     public static MarkGenreState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         user.SuggestedGenres = dbAccessor.GetGenres().ToDictionary(g => g.Name, g => g);
         await bot.SendMessage(user.ChatId, "Выберите жанр для трека",
             replyMarkup: user.SuggestedGenres.ToInlineKeyboardMarkup());
     }
 
-    public override async Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+    public override async Task<State?> OnCallback(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
         CallbackQuery callback)
     {
         if (callback.Data.StartsWith("accept"))
@@ -234,14 +234,14 @@ public class MarkMoodState : InputHandlingState
 {
     public static MarkMoodState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         user.SuggestedMoods = dbAccessor.GetMoods().ToDictionary(m => m.Name, m => m);
         await bot.SendMessage(user.ChatId, "Выберите настроение для трека",
             replyMarkup: user.SuggestedMoods.ToInlineKeyboardMarkup());
     }
 
-    public override async Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+    public override async Task<State?> OnCallback(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
         CallbackQuery callback)
     {
         if (callback.Data.StartsWith("accept"))
@@ -262,7 +262,7 @@ public class AddVoteState : LambdaState
 {
     public static AddVoteState Instance { get; } = new();
 
-    public override async Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task<State> Execute(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         foreach (var mood in user.SelectedMoods)
             dbAccessor.AddVote(user.CurrentDbTrack.DbAudioId, mood.Id, VoteValue.Confirmation, user.DbUser.Id);

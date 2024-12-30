@@ -10,14 +10,14 @@ public class InitState : InputHandlingState
 {
     public static InitState Instance { get; } = new();
 
-    public override Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
         => throw new InvalidOperationException("Никогда не должен был быть вызван");
 
     // на любое действие пользователя переходит к приветственному состоянию
-    public override Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Message message)
+    public override Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Message message)
         => Task.FromResult<State?>(GreetingState.Instance);
 
-    public override Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+    public override Task<State?> OnCallback(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
         CallbackQuery callback)
         => Task.FromResult<State?>(GreetingState.Instance);
 }
@@ -26,7 +26,7 @@ public class GreetingState : LambdaState
 {
     public static GreetingState Instance { get; } = new();
 
-    public override async Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task<State> Execute(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         await bot.SendMessage(user.ChatId,
             "Добро пожаловать!\n" +
@@ -43,7 +43,7 @@ class LoginMenuState : InputHandlingState
     private readonly ReplyKeyboardMarkup commands =
         new ReplyKeyboardMarkup(true).AddButton("/login").AddButton("/demo");
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         await bot.SendMessage(user.ChatId,
             "Выберите одну из следующих команд\n" +
@@ -53,7 +53,7 @@ class LoginMenuState : InputHandlingState
     }
 
     // todo: Выделить бота и юзера в отдельный класс?
-    public override Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Message msg)
+    public override Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Message msg)
     {
         switch (msg.Text)
         {
@@ -75,7 +75,7 @@ class MainMenuState : InputHandlingState
     private readonly ReplyKeyboardMarkup commands =
         new ReplyKeyboardMarkup(true).AddButton("/playlist").AddButton("/mark");
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         await bot.SendMessage(user.ChatId,
             "Можете выбрать команду из меню:\n" +
@@ -84,7 +84,7 @@ class MainMenuState : InputHandlingState
             replyMarkup: commands);
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Message msg)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Message msg)
     {
         switch (msg.Text)
         {

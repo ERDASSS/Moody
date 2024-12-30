@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SQLite;
-using System.Linq;
-using Database;
-using Database.db_models;
+﻿using System.Data.SQLite;
 using VkNet.Model.Attachments;
 using Xunit;
 
-public class DbAccessorTests : IDisposable
+namespace Database.Tests;
+
+public class SqliteDbAccessorTests : IDisposable
 {
-    private readonly DbAccessor _dbAccessor;
+    private readonly SqliteDbAccessor _dbAccessor;
     private readonly SQLiteConnection _connection;
 
-    public DbAccessorTests()
+    public SqliteDbAccessorTests()
     {
         _connection = new SQLiteConnection("Data Source=:memory:;Version=3;");
         _connection.Open();
-        _dbAccessor = new DbAccessor(":memory:") { Connection = _connection };
+        _dbAccessor = new SqliteDbAccessor(":memory:") { Connection = _connection };
         SetupDatabase();
     }
 

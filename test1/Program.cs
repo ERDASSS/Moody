@@ -20,7 +20,7 @@ class Program
         var services = new ServiceCollection();
         services.AddAudioBypass();
         var api = new VkApi(services);
-        var dbAccessor = new DbAccessor();
+        var dbAccessor = new SqliteDbAccessor();
         //api.Authorize(new ApiAuthParams
         //{
         //    ApplicationId = 52614150,

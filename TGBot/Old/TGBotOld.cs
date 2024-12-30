@@ -20,7 +20,7 @@ namespace TGBot.Old;
 
 public class TGBotOld
 {
-    public TGBotOld(string token, DbAccessor dbAccessor)
+    public TGBotOld(string token, IDbAccessor dbAccessor)
     {
         bot = new TelegramBotClient(token, cancellationToken: cts.Token);
         // await bot.DeleteWebhook();
@@ -38,7 +38,7 @@ public class TGBotOld
     private readonly CancellationTokenSource cts = new();
     private readonly Dictionary<long, OldAuthorization> authorizations = new();
     private readonly Dictionary<long, VkUserOld> users = new();
-    private readonly DbAccessor dbAccessor;
+    private readonly IDbAccessor dbAccessor;
 
     private readonly ReplyKeyboardMarkup replyKeyboardStart = new(
         new List<KeyboardButton[]>

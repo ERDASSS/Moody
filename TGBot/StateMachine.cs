@@ -1,11 +1,8 @@
 using System.Diagnostics;
-using ApiMethods;
 using Database;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 using TGBot.States;
 
 namespace TGBot;
@@ -23,19 +20,27 @@ public class StateMachine
     //       - выполняется код входа в состояние B
 
     private InputHandlingState currentState = InitState.Instance;
-    private readonly Dictionary<long, TgUser> users = new();
+    internal readonly Dictionary<long, TgUser> users = new();
     private readonly TelegramBotClient bot;
-    private readonly DbAccessor dbAccessor;
+    private readonly IDbAccessor dbAccessor;
     private readonly ReactionToIncorrectInput onIncorrectInput;
 
-    private readonly CancellationTokenSource cts = new(); // так и не понял что это и зачем
+    private static readonly CancellationTokenSource cts = new(); // так и не понял что это и зачем
 
     public StateMachine(
         string token,
-        DbAccessor dbAccessor,
+        IDbAccessor dbAccessor,
+        ReactionToIncorrectInput onIncorrectInput = ReactionToIncorrectInput.Ignore)
+        : this(new TelegramBotClient(token, cancellationToken: cts.Token), dbAccessor, onIncorrectInput)
+    {
+    }
+
+    public StateMachine(
+        TelegramBotClient botClient,
+        IDbAccessor dbAccessor,
         ReactionToIncorrectInput onIncorrectInput = ReactionToIncorrectInput.Ignore)
     {
-        bot = new TelegramBotClient(token, cancellationToken: cts.Token);
+        bot = botClient;
         this.dbAccessor = dbAccessor;
         this.onIncorrectInput = onIncorrectInput;
         bot.OnError += OnError;
@@ -52,7 +57,7 @@ public class StateMachine
         await Task.Delay(2000, cts.Token);
     }
 
-    private async Task OnUpdate(Update update)
+    internal async Task OnUpdate(Update update)
     {
         var (chatId, username) = update switch
         {
@@ -108,20 +113,20 @@ public abstract class State
 
 public abstract class InputHandlingState : State
 {
-    public abstract Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user);
+    public abstract Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user);
 
     // по умолчанию никакие входящие сигналы не обрабатываются
     // если вернулся null - значит состояние не нужно менять
-    public virtual Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user, Message message) =>
-        throw new UnexpectedMessageException(message);
+    public virtual Task<State?>
+        OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
+            Message message) => throw new UnexpectedMessageException(message);
 
-    public virtual Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
-        CallbackQuery callback) =>
-        throw new UnexpectedCallbackException(callback);
+    public virtual Task<State?> OnCallback(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
+        CallbackQuery callback) => throw new UnexpectedCallbackException(callback);
 }
 
 public abstract class LambdaState : State
 {
     // сразу возвращает State, на который нужно перейти, не ожидая ввода (лямбда переход)
-    public abstract Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user);
+    public abstract Task<State> Execute(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user);
 }
