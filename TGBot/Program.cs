@@ -1,15 +1,14 @@
 ﻿using Database;
+using Ninject;
 using Telegram.Bot;
 
 namespace TGBot;
 
-class Program
+public static class Program
 {
     public static async Task Main()
     {
-        var dbAccessor = new DbAccessor();
-        // var bot = new TGBotOld("7727939273:AAFqtb1fa1rNsHxDDUjLO8JLZztddX1LvMo", dbAccessor);
-        var stateMachine = new StateMachine("7727939273:AAFqtb1fa1rNsHxDDUjLO8JLZztddX1LvMo", dbAccessor);
+        var stateMachine = DiConstructor.GetContainer().Get<StateMachine>();
         Console.ReadKey();
     }
 }

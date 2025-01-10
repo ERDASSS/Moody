@@ -13,7 +13,7 @@ class EnterLoginState : InputHandlingState
 {
     public static EnterLoginState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         var commands = new ReplyKeyboardMarkup(true).AddButton("/back");
         await bot.SendMessage(user.ChatId, "Введите логин (номер телефона или почта).\n" +
@@ -21,7 +21,7 @@ class EnterLoginState : InputHandlingState
             replyMarkup: commands);
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
         Message message)
     {
         if (message.Text == "/back")
@@ -48,7 +48,7 @@ class EnterPasswordState : InputHandlingState
 {
     public static EnterPasswordState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         var commands = new ReplyKeyboardMarkup(true).AddButton("/back").AddButton("/exit");
         await bot.SendMessage(user.ChatId, "Введите пароль.\n" +
@@ -57,7 +57,7 @@ class EnterPasswordState : InputHandlingState
             replyMarkup: commands);
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
         Message message)
     {
         if (message.Text == "/back")
@@ -113,12 +113,12 @@ class Enter2FACodeState : InputHandlingState
 {
     public static Enter2FACodeState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         await bot.SendMessage(user.ChatId, "Введите код двухфакторной авторизации:");
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
         Message message)
     {
         if (message.Text is null)

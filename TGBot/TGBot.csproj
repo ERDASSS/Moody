@@ -10,6 +10,7 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+      <PackageReference Include="Ninject" Version="3.3.6" />
       <PackageReference Include="SQLite" Version="3.13.0" />
       <PackageReference Include="Telegram.Bot" Version="22.2.0" />
       <PackageReference Include="xunit" Version="2.9.2" />

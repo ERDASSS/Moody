@@ -11,7 +11,7 @@ class BeginMakingPlaylist : LambdaState // просто алиас для удо
 {
     public static BeginMakingPlaylist Instance { get; } = new();
 
-    public override Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override Task<State> Execute(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         return Task.FromResult<State>(SelectMoodsState.Instance);
     }
@@ -21,14 +21,14 @@ class SelectMoodsState : InputHandlingState
 {
     public static SelectMoodsState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         user.SuggestedMoods = dbAccessor.GetMoods().ToDictionary(m => m.Name, m => m);
         await bot.SendMessage(user.ChatId, "Выберите настроения",
             replyMarkup: user.SuggestedMoods.ToInlineKeyboardMarkup());
     }
 
-    public override async Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+    public override async Task<State?> OnCallback(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
         CallbackQuery callback)
     {
         if (callback.Data is null)
@@ -53,14 +53,14 @@ class SelectGenreState : InputHandlingState
 {
     public static SelectGenreState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         user.SuggestedGenres = dbAccessor.GetGenres().ToDictionary(g => g.Name, g => g);
         await bot.SendMessage(user.ChatId, "Выберите жанры",
             replyMarkup: user.SuggestedGenres.ToInlineKeyboardMarkup());
     }
 
-    public override async Task<State?> OnCallback(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+    public override async Task<State?> OnCallback(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
         CallbackQuery callback)
     {
         if (callback.Data is null)
@@ -85,7 +85,7 @@ public class CreatePlaylistState : LambdaState
 {
     public static CreatePlaylistState Instance { get; } = new();
 
-    public override async Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task<State> Execute(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         try // чтобы бот не падал, если что-то не так с бд
         {
@@ -129,7 +129,7 @@ public class CreatePlaylistState : LambdaState
 
     private async Task<List<VkNet.Model.Attachments.Audio>> GetUnmarkedTracks(
         List<VkNet.Model.Attachments.Audio> nonSelectedTracks,
-        DbAccessor dbAccessor
+        IDbAccessor dbAccessor
     )
     {
         var unmarkedTracks = new List<VkNet.Model.Attachments.Audio>();
@@ -151,7 +151,7 @@ public class MarkOrContinueState : InputHandlingState
 {
     public static MarkOrContinueState Instance { get; } = new();
 
-    public override async Task BeforeAnswer(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         var commands = new ReplyKeyboardMarkup(true).AddButton("/mark_unmarked").AddButton("/continue");
 
@@ -161,7 +161,7 @@ public class MarkOrContinueState : InputHandlingState
         await bot.SendMessage(user.ChatId, message, replyMarkup: commands);
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user,
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
         Message message)
     {
         switch (message.Text)
@@ -181,7 +181,7 @@ public class FinishCreatingPlaylist : LambdaState
 {
     public static FinishCreatingPlaylist Instance { get; } = new();
 
-    public override async Task<State> Execute(TelegramBotClient bot, DbAccessor dbAccessor, TgUser user)
+    public override async Task<State> Execute(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         var description = "Плейлист создан по следующим жанрам и настроениям:\n" +
             $"Жанры:{user.SelectedGenres.Select(genre => $"{genre.Name}; ")}\n" +

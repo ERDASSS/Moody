@@ -7,7 +7,7 @@ namespace TGBot;
 
 static class ParametersExtension
 {
-    // что-то мне все меньше нравится этот класс, но как это сделать получше - не знаю
+    // что-то мне все меньше нравится этот класс
     public static InlineKeyboardMarkup ToInlineKeyboardMarkup<TParameterValue>(
         this Dictionary<string, TParameterValue> parameterValues)
         where TParameterValue : DbAudioParameterValue
