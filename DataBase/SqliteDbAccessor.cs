@@ -7,7 +7,6 @@ using VkNet.Utils;
 
 namespace Database;
 
-// TODO: оказывается юзернейм есть не у всех пользователей тг
 // todo: добавить голосам временную метку
 public class SqliteDbAccessor : IDbAccessor
 {
@@ -215,7 +214,9 @@ public class SqliteDbAccessor : IDbAccessor
             // вытаскиваем пользователя, проголосовавшего за это значение
             var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
             var chatId = (long)reader.GetInt32(reader.GetOrdinal("chat_id"));
-            var username = reader.GetString(reader.GetOrdinal("username"));
+            string? username = null;
+            if (!reader.IsDBNull(reader.GetOrdinal("username")))
+                username = reader.GetString(reader.GetOrdinal("username"));
             var user = new DbUser(userId, chatId, username);
 
             // и наконец сохраняем значение/тип голоса/пользователи
@@ -251,7 +252,7 @@ public class SqliteDbAccessor : IDbAccessor
         command.ExecuteNonQuery();
     }
 
-    public void AddOrUpdateUser(long chatId, string username)
+    public void AddOrUpdateUser(long chatId, string? username)
     {
         const string insertOrUpdateQuery = @"
         INSERT INTO users (chat_id, username) VALUES (@ChatId, @Username)
@@ -294,4 +295,3 @@ public class SqliteDbAccessor : IDbAccessor
         );
     }
 }
-

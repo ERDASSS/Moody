@@ -20,7 +20,7 @@ public interface IDbAccessor
     public void SaveAudioInDb(Audio vkAudio);
     public DbAudio? TryGetAudioFromBd(Audio vkAudio);
     public void AddVote(int audioId, int parameterValueId, VoteValue voteValue, int userId);
-    public void AddOrUpdateUser(long chatId, string username);
+    public void AddOrUpdateUser(long chatId, string? username);
     public DbUser? GetUserByChatId(long chatId);
 
     public DbUser? GetUserByUsername(string username);

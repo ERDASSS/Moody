@@ -136,11 +136,11 @@ public class DbMood(int id, string name, string? description)
 public class DbGenre(int id, string name, string? description)
     : DbAudioParameterValue(id, DbAudioParameter.GenreParameter.Id, name, description);
 
-public class DbUser(int id, long chatId, string username)
+public class DbUser(int id, long chatId, string? username)
 {
-    public int Id = id;
-    public long ChatId = chatId;
-    public string Username = username;
+    public readonly int Id = id;
+    public readonly long ChatId = chatId;
+    public readonly string? Username = username;
 }
 
 public enum VoteValue
