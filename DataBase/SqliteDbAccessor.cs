@@ -252,6 +252,25 @@ public class SqliteDbAccessor : IDbAccessor
         command.ExecuteNonQuery();
     }
 
+    public IEnumerable<FullInfoAboutTrack> FetchAndAddIfNecessary(IEnumerable<Audio> targetTracks)
+    {
+        foreach (var vkAudio in targetTracks)
+        {
+            var dbAudio = TryGetAudioFromBd(vkAudio);
+            if (dbAudio == null)
+            {
+                // если трека нет в бд, сохраняем его туда с пустыми параметрами
+                // TODO: **Делать 1 запрос, а не по запросу на каждый трек**
+                SaveAudioInDb(vkAudio);
+                continue;
+            }
+
+            dbAudio = TryGetAudioFromBd(vkAudio);
+
+            yield return new FullInfoAboutTrack(vkAudio, dbAudio);
+        }
+    }
+
     public void AddOrUpdateUser(long chatId, string? username)
     {
         const string insertOrUpdateQuery = @"

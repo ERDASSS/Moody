@@ -32,7 +32,7 @@ public class TgUser(long chatId, string? tgUsername)
     public Audio? CurrentTrack { get; set; }
     public DbAudio? CurrentDbTrack { get; set; }
     public bool HasGenresVotes { get; set; }
-    public List<Audio> UnmarkedTracks { get; set; }
+    public List<FullInfoAboutTrack> UnmarkedTracks { get; set; }
     public List<Audio> ChosenTracks { get; set; }
     public int CurrentSkip { get; set; } = 1;
 

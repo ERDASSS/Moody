@@ -48,7 +48,7 @@ class LoginMenuState : InputHandlingState
         await bot.SendMessage(user.ChatId,
             "Выберите одну из следующих команд\n" +
             "/login  -  перейти к авторизации\n" +
-            "/demo   -  опробовать функционал на заранее заданных треках (без авторизации и без создания плейлиста)",
+            "/demo   -  опробовать функционал на заранее заданных треках (без авторизации)",
             replyMarkup: commands);
     }
 

@@ -26,7 +26,10 @@ class SelectMoodsState : InputHandlingState
     {
         user.SuggestedMoods = dbAccessor.GetMoods().ToDictionary(m => m.Name, m => m);
         await bot.SendMessage(user.ChatId, "Выберите настроения",
-            replyMarkup: user.SuggestedMoods.ToInlineKeyboardMarkup());
+            replyMarkup: user.SuggestedMoods
+                .Where(p => !p.Key.StartsWith('['))
+                .ToDictionary()
+                .ToInlineKeyboardMarkup());
     }
 
     public override async Task<State?> OnCallback(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
@@ -57,8 +60,11 @@ class SelectGenreState : InputHandlingState
     public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         user.SuggestedGenres = dbAccessor.GetGenres().ToDictionary(g => g.Name, g => g);
-        await bot.SendMessage(user.ChatId, "Выберите жанры",
-            replyMarkup: user.SuggestedGenres.ToInlineKeyboardMarkup());
+        await bot.SendMessage(user.ChatId, "Выберите жанры (если вам не важен жанр, сразу нажмите [подтвердить])",
+            replyMarkup: user.SuggestedGenres
+                .Where(p => !p.Key.StartsWith('['))
+                .ToDictionary()
+                .ToInlineKeyboardMarkup());
     }
 
     public override async Task<State?> OnCallback(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
@@ -108,7 +114,7 @@ public class CreatePlaylistState : LambdaState
                           string.Join('\n', chosenTracks.Select(x => $"*> {x.Title}* - _{x.Artist}_"));
             await bot.SendMessage(user.ChatId, message, ParseMode.Markdown);
 
-            user.UnmarkedTracks = unmarkedTracks;
+            user.UnmarkedTracks = dbAccessor.FetchAndAddIfNecessary(unmarkedTracks).ToList();
             user.ChosenTracks = chosenTracks;
 
             if (unmarkedTracks.Count > 0)

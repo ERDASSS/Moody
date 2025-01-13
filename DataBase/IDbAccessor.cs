@@ -14,6 +14,11 @@ public interface IDbAccessor
     public string DbPath { get; }
     public string ConnectionString => $"Data Source={DbPath};Version=3;";
     public SQLiteConnection Connection { get; set; }
+    
+    /// <summary>
+    /// Достает из бд все искомые треки, а если их там нет, то сначала добавляет, а потом достает
+    /// </summary>
+    public IEnumerable<FullInfoAboutTrack> FetchAndAddIfNecessary(IEnumerable<Audio> targetTracks);
     public IEnumerable<Audio> FilterAndSaveNewInDb(IEnumerable<Audio> usersFavouriteAudios, Filter filter);
     public List<DbMood> GetMoods();
     public List<DbGenre> GetGenres();

@@ -2,6 +2,7 @@ using Database;
 using Database.db_models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using VkNet.Model;
 using Message = Telegram.Bot.Types.Message;
@@ -24,8 +25,15 @@ public class BeginMarkState : LambdaState
         if (user.CurrentSkip == 1)
         {
             if (!user.IsMarkingUnmarked)
-                user.UnmarkedTracks = user.ApiWrapper!.GetFavouriteTracks().ToList();
-            user.CurrentTrack = user.UnmarkedTracks.FirstOrDefault();
+            {
+                user.UnmarkedTracks = dbAccessor
+                    .FetchAndAddIfNecessary(user.ApiWrapper!.GetFavouriteTracks())
+                    .OrderBy(t =>
+                        t.DbAudio.GetUsersVotes(user.ChatId).Count) // сначала те, что _пользователь_ не размечал
+                    .ToList();
+            }
+
+            user.CurrentTrack = user.UnmarkedTracks.FirstOrDefault().VkAudio;
         }
 
         var dbAudio = dbAccessor.TryGetAudioFromBd(user.CurrentTrack);
@@ -59,7 +67,8 @@ public class ShowMarkupInfoState : LambdaState
     private async Task ShowTrackInfo(TelegramBotClient bot, TgUser user)
     {
         await bot.SendMessage(user.ChatId, $"Укажите жанр и настроение для: " +
-                                           $"{user.CurrentTrack.Artist} - {user.CurrentTrack.Title}");
+                                           $"*{user.CurrentTrack.Title}* - _{user.CurrentTrack.Artist}_",
+            ParseMode.Markdown);
         if (user.CurrentDbTrack.Votes.Count != 0 && !user.IsMarkingUnmarked)
         {
             var votes = user.CurrentDbTrack.GetVotesStatistics();
@@ -120,7 +129,8 @@ public class MarkAgreementStateGenres : InputHandlingState
             replyMarkup: commands);
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Message message)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
+        Message message)
     {
         switch (message.Text)
         {
@@ -266,7 +276,7 @@ public class MarkMoodState : InputHandlingState
 
         return null;
     }
-    
+
     public override Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Message message)
     {
         if (message.Text == "/menu")
@@ -288,7 +298,7 @@ public class AddVoteState : LambdaState
             dbAccessor.AddVote(user.CurrentDbTrack.DbAudioId, genre.Id, VoteValue.Confirmation, user.DbUser.Id);
 
         user.ResetMoodsAndGenres();
-        user.CurrentTrack = user.UnmarkedTracks.Skip(user.CurrentSkip).FirstOrDefault();
+        user.CurrentTrack = user.UnmarkedTracks.Skip(user.CurrentSkip).FirstOrDefault().VkAudio;
         user.CurrentSkip++;
 
         if (user.CurrentTrack == null || user.CurrentTrack == default)

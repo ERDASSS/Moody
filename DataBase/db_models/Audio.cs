@@ -7,6 +7,23 @@ public class DbAudio(int dbAudioId, string title, DbAuthor author, DbUsersByPvVv
     public DbAuthor Author { get; } = author;
     public DbUsersByPvVv Votes { get; } = votes;
 
+    /// <summary>
+    /// Вытаскивает из всех голосов голоса конкретного пользователя
+    /// </summary>
+    public Dictionary<DbAudioParameterValue, VoteValue> GetUsersVotes(long chatId)
+    {
+        var result = new Dictionary<DbAudioParameterValue, VoteValue>();
+        foreach (var (pv, usersByVv) in Votes)
+        foreach (var (vv, users) in usersByVv)
+            if (users.Any(u => u.ChatId == chatId))
+            {
+                result[pv] = vv;
+                break;
+            }
+
+        return result;
+    }
+
     public Dictionary<DbAudioParameterValue, Dictionary<VoteValue, int>> GetVotesStatistics()
     {
         var statistic = new Dictionary<DbAudioParameterValue, Dictionary<VoteValue, int>>();
