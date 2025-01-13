@@ -19,7 +19,7 @@ public class StateMachine
     //       - состояние меняется с A на B
     //       - выполняется код входа в состояние B
 
-    private InputHandlingState currentState = InitState.Instance;
+    private Dictionary<long, InputHandlingState> currentStates = new ();
     internal readonly Dictionary<long, TgUser> users = new();
     private readonly TelegramBotClient bot;
     private readonly IDbAccessor dbAccessor;
@@ -67,6 +67,8 @@ public class StateMachine
             { CallbackQuery: { } cbQuery } => (cbQuery.From.Id, cbQuery.From.Username),
             _ => throw new InvalidOperationException($"пришел Update неожиданного типа: {update}")
         };
+        if (!currentStates.ContainsKey(chatId))
+            currentStates[chatId] = InitState.Instance;
 
         if (!users.ContainsKey(chatId))
             users[chatId] = new TgUser(chatId, username);
@@ -77,9 +79,9 @@ public class StateMachine
             var nextState = update switch
             {
                 { Message: { } message } =>
-                    await currentState.OnMessage(bot, dbAccessor, currentUser, message),
+                    await currentStates[chatId].OnMessage(bot, dbAccessor, currentUser, message),
                 { CallbackQuery: { } callback } =>
-                    await currentState.OnCallback(bot, dbAccessor, currentUser, callback),
+                    await currentStates[chatId].OnCallback(bot, dbAccessor, currentUser, callback),
                 _ => throw new InvalidOperationException($"пришел Update неожиданного типа: {update}")
             };
             if (nextState is null) return;
@@ -90,7 +92,7 @@ public class StateMachine
                 throw new InvalidOperationException(
                     $"ожидалось, что состояние может быть либо Lambda либо InputHandling, а оно: {nextState}");
 
-            currentState = nextInputHandlingState;
+            currentStates[chatId] = nextInputHandlingState;
             await nextInputHandlingState.BeforeAnswer(bot, dbAccessor, currentUser);
         }
         catch (InputException e)
