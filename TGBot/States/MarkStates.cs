@@ -4,6 +4,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using VkNet.Model;
+using Message = Telegram.Bot.Types.Message;
 
 namespace TGBot.States;
 
@@ -70,7 +71,7 @@ public class ShowMarkupInfoState : LambdaState
         }
         else if (user.CurrentDbTrack.Votes.Count == 0)
         {
-            await bot.SendMessage(user.ChatId, "У данного трека отстутствует разметка. Вы будете первым!");
+            await bot.SendMessage(user.ChatId, "У данного трека отсутствует разметка. Вы будете первым!");
         }
     }
 
@@ -80,9 +81,10 @@ public class ShowMarkupInfoState : LambdaState
         if (!votes.Where(v => v.Key.ParameterId == parameterId).Any())
         {
             var genreOrMood = parameterId == 1 ? "жанры" : "настроения";
-            await bot.SendMessage(user.ChatId, $"У данного трека отстутствуют {genreOrMood}. Вы будете первым!");
+            await bot.SendMessage(user.ChatId, $"У данного трека отсутствуют {genreOrMood}. Вы будете первым!");
             return;
         }
+
         foreach (var vote in votes.Where(v => v.Key.ParameterId == parameterId))
         {
             var confirm = 0;
@@ -118,7 +120,7 @@ public class MarkAgreementStateGenres : InputHandlingState
             replyMarkup: commands);
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Telegram.Bot.Types.Message message)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Message message)
     {
         switch (message.Text)
         {
@@ -127,7 +129,7 @@ public class MarkAgreementStateGenres : InputHandlingState
                 // Add confirmation votes for genres
                 foreach (var genre in user.CurrentDbTrack.Votes.Keys.Where(vote => vote.ParameterId == 2))
                     dbAccessor.AddVote(user.CurrentDbTrack.DbAudioId, genre.Id, VoteValue.Confirmation, user.DbUser.Id);
-                
+
                 await bot.SendMessage(user.ChatId, "Вы подтвердили жанры.");
                 return MarkAgreementStateMoods.Instance; // Proceed to mood agreement
 
@@ -136,15 +138,15 @@ public class MarkAgreementStateGenres : InputHandlingState
                 // Add against votes for genres
                 foreach (var genre in user.CurrentDbTrack.Votes.Keys.Where(vote => vote.ParameterId == 2))
                     dbAccessor.AddVote(user.CurrentDbTrack.DbAudioId, genre.Id, VoteValue.Against, user.DbUser.Id);
-                
+
                 await bot.SendMessage(user.ChatId, "Вы не согласны с жанрами.");
                 return MarkGenreState.Instance; // Allow user to select new genres
 
             case "/exit":
 
                 return MainMenuState.Instance;
-
         }
+
         return null;
     }
 }
@@ -165,7 +167,8 @@ public class MarkAgreementStateMoods : InputHandlingState
             replyMarkup: commands);
     }
 
-    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Telegram.Bot.Types.Message message)
+    public override async Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user,
+        Telegram.Bot.Types.Message message)
     {
         switch (message.Text)
         {
@@ -190,8 +193,8 @@ public class MarkAgreementStateMoods : InputHandlingState
             case "/exit":
 
                 return MainMenuState.Instance;
-
         }
+
         return null;
     }
 }
@@ -203,7 +206,7 @@ public class MarkGenreState : InputHandlingState
     public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         user.SuggestedGenres = dbAccessor.GetGenres().ToDictionary(g => g.Name, g => g);
-        await bot.SendMessage(user.ChatId, "Выберите жанр для трека",
+        await bot.SendMessage(user.ChatId, "Выберите жанр для трека (или вернитесь в меню: /menu)",
             replyMarkup: user.SuggestedGenres.ToInlineKeyboardMarkup());
     }
 
@@ -228,6 +231,13 @@ public class MarkGenreState : InputHandlingState
         // todo: но я хз как это реализовать
         return null;
     }
+
+    public override Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Message message)
+    {
+        if (message.Text == "/menu")
+            return Task.FromResult<State?>(MainMenuState.Instance);
+        return Task.FromResult<State?>(null);
+    }
 }
 
 public class MarkMoodState : InputHandlingState
@@ -237,7 +247,7 @@ public class MarkMoodState : InputHandlingState
     public override async Task BeforeAnswer(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user)
     {
         user.SuggestedMoods = dbAccessor.GetMoods().ToDictionary(m => m.Name, m => m);
-        await bot.SendMessage(user.ChatId, "Выберите настроение для трека",
+        await bot.SendMessage(user.ChatId, "Выберите настроение для трека (или вернитесь в меню /menu)",
             replyMarkup: user.SuggestedMoods.ToInlineKeyboardMarkup());
     }
 
@@ -249,12 +259,19 @@ public class MarkMoodState : InputHandlingState
             await bot.AnswerCallbackQuery(callback.Id, "Принято");
             return AddVoteState.Instance;
         }
-        
+
         var mood = callback.Data.Replace("Mood", "");
         await bot.AnswerCallbackQuery(callback.Id, $"Вы выбрали {mood}");
         user.SelectMood(user.SuggestedMoods[mood]);
 
         return null;
+    }
+    
+    public override Task<State?> OnMessage(TelegramBotClient bot, IDbAccessor dbAccessor, TgUser user, Message message)
+    {
+        if (message.Text == "/menu")
+            return Task.FromResult<State?>(MainMenuState.Instance);
+        return Task.FromResult<State?>(null);
     }
 }
 

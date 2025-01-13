@@ -1,6 +1,7 @@
 using Database;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TGBot.States;
@@ -102,11 +103,10 @@ public class CreatePlaylistState : LambdaState
 
             var nonSelectedTracks = favouriteTracks.Except(chosenTracks).ToList();
             var unmarkedTracks = await GetUnmarkedTracks(nonSelectedTracks, dbAccessor);
-
-            // todo: выравнивать список по колонкам
-            var message = "В плейлист вошли:\n" +
-                          string.Join('\n', chosenTracks.Select(x => $"> {x.Title} - {x.Artist}"));
-            await bot.SendMessage(user.ChatId, message);
+            
+            var message = "В плейлист вошли:\n\n" +
+                          string.Join('\n', chosenTracks.Select(x => $"*> {x.Title}* - _{x.Artist}_"));
+            await bot.SendMessage(user.ChatId, message, ParseMode.Markdown);
 
             user.UnmarkedTracks = unmarkedTracks;
             user.ChosenTracks = chosenTracks;
@@ -114,7 +114,6 @@ public class CreatePlaylistState : LambdaState
             if (unmarkedTracks.Count > 0)
                 return MarkOrContinueState.Instance;
             
-
             return FinishCreatingPlaylist.Instance;
         }
         catch (Exception e)
