@@ -94,7 +94,9 @@ public class ShowMarkupInfoState : LambdaState
             return;
         }
 
-        foreach (var vote in votes.Where(v => v.Key.ParameterId == parameterId))
+        foreach (var vote in votes
+                     .Where(v => v.Key.ParameterId == parameterId)
+                     .Where(p => !p.Key.Name.StartsWith('[')))
         {
             var confirm = 0;
             var against = 0;

@@ -213,7 +213,7 @@ public class SqliteDbAccessor : IDbAccessor
 
             // вытаскиваем пользователя, проголосовавшего за это значение
             var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
-            var chatId = (long)reader.GetInt32(reader.GetOrdinal("chat_id"));
+            var chatId = reader.GetInt64(reader.GetOrdinal("chat_id"));
             string? username = null;
             if (!reader.IsDBNull(reader.GetOrdinal("username")))
                 username = reader.GetString(reader.GetOrdinal("username"));
@@ -290,7 +290,7 @@ public class SqliteDbAccessor : IDbAccessor
         const string query = "SELECT user_id, chat_id, username FROM users WHERE chat_id = @ChatId";
         using var command = new SQLiteCommand(query, Connection);
         command.Parameters.AddWithValue("@ChatId", chatId);
-        return GetUserByUsername(command);
+        return GetUserByCommand(command);
     }
 
     public DbUser? GetUserByUsername(string username)
@@ -299,18 +299,24 @@ public class SqliteDbAccessor : IDbAccessor
             "SELECT user_id, chat_id, username FROM users WHERE chat_id = @Username",
             Connection);
         command.Parameters.AddWithValue("@ChatId", username);
-        return GetUserByUsername(command);
+        return GetUserByCommand(command);
     }
 
-    private DbUser? GetUserByUsername(SQLiteCommand command)
+    private DbUser? GetUserByCommand(SQLiteCommand command)
     {
         using var reader = command.ExecuteReader();
         if (!reader.Read())
             return null; // User not found
+        var userId = reader.GetInt32(reader.GetOrdinal("user_id"));
+        var chatId = reader.GetInt64(reader.GetOrdinal("chat_id"));
+        string username = null;
+        if (!reader.IsDBNull(reader.GetOrdinal("username")))
+            username = reader.GetString(reader.GetOrdinal("username"));
+
         return new DbUser(
-            reader.GetInt32(reader.GetOrdinal("user_id")),
-            reader.GetInt32(reader.GetOrdinal("chat_id")),
-            reader.GetString(reader.GetOrdinal("username"))
+            userId,
+            chatId,
+            username
         );
     }
 }
