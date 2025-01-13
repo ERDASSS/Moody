@@ -73,9 +73,9 @@ public class ShowMarkupInfoState : LambdaState
         {
             var votes = user.CurrentDbTrack.GetVotesStatistics();
             await bot.SendMessage(user.ChatId, "Текущая разметка трека:");
-            await bot.SendMessage(user.ChatId, "Настроения:");
+            await bot.SendMessage(user.ChatId, "*Настроения:*", ParseMode.Markdown);
             await ShowTrackStat(bot, user.ChatId, 1, votes, user);
-            await bot.SendMessage(user.ChatId, "Жанры:");
+            await bot.SendMessage(user.ChatId, "*Жанры:*", ParseMode.Markdown);
             await ShowTrackStat(bot, user.ChatId, 2, votes, user);
         }
         else if (user.CurrentDbTrack.Votes.Count == 0)
